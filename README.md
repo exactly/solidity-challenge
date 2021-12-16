@@ -1,4 +1,4 @@
-# Smart Contract Challenge [Deprecated - Thank you for all the applications 👾]
+# Smart Contract Challenge
 
 ## A) Challenge
 
