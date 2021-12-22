@@ -36,7 +36,11 @@ Useful resources:
 - Educational Resource: https://github.com/austintgriffith/scaffold-eth
 - Project Starter: https://github.com/abarmat/solidity-starter
 
-### 2) Deploy your contract
+### 2) Write tests
+
+Make sure that all your code is tested properly
+
+### 3) Deploy your contract
 
 Deploy the contract to any Ethereum testnet of your preference. Keep record of the deployed address.
 
@@ -44,7 +48,7 @@ Bonus:
 
 - Verify the contract in Etherscan
 
-### 3) Interact with the contract
+### 4) Interact with the contract
 
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
