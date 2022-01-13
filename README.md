@@ -40,7 +40,9 @@ Useful resources:
 
 Make sure that all your code is tested properly
 
-npx hardhat test ./test/testETHPool.ts
+***Solution***
+
+`npx hardhat test ./test/testETHPool.ts`
 
 ### 3) Deploy your contract
 
@@ -50,15 +52,22 @@ Deploy the contract to any Ethereum testnet of your preference. Keep record of t
 It is necessary to have a hidden file (.env) where the Infura project ID,
 the EtherScan API Key and the private key of the account that will sign the transactions are stored
 
+***Solution***
+
 to deploy the contract
+
 `npx hardhat run --network rinkeby scripts/deploy.ts`
 
 Address of the contract of this solution 
-0x5adcFC1289F883E9210ADF40840E7602F15755e6
+
+[0x5adcFC1289F883E9210ADF40840E7602F15755e6](http://https://rinkeby.etherscan.io/address/0x5adcFC1289F883E9210ADF40840E7602F15755e6 "0x5adcFC1289F883E9210ADF40840E7602F15755e6")
+
 
 Bonus:
 
 - Verify the contract in Etherscan
+
+***Solution***
 
 to verify the contract
 `npx hardhat verify --network rinkeby 'contract address'`
