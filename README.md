@@ -40,16 +40,43 @@ Useful resources:
 
 Make sure that all your code is tested properly
 
+***Solution***
+
+`npx hardhat test ./test/testETHPool.ts`
+
 ### 3) Deploy your contract
 
 Deploy the contract to any Ethereum testnet of your preference. Keep record of the deployed address.
 
+
+It is necessary to have a hidden file (.env) where the Infura project ID,
+the EtherScan API Key and the private key of the account that will sign the transactions are stored
+
+***Solution***
+
+to deploy the contract
+
+`npx hardhat run --network rinkeby scripts/deploy.ts`
+
+Address of the contract of this solution 
+
+[0x5adcFC1289F883E9210ADF40840E7602F15755e6](https://rinkeby.etherscan.io/address/0x5adcFC1289F883E9210ADF40840E7602F15755e6 "0x5adcFC1289F883E9210ADF40840E7602F15755e6")
+
 Bonus:
 
 - Verify the contract in Etherscan
+
+***Solution***
+
+to verify the contract
+`npx hardhat verify --network rinkeby 'contract address'`
 
 ### 4) Interact with the contract
 
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
 _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
+
+`npx hardhat run scripts/interactWithContract.ts`
+
+
