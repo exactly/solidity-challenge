@@ -1,12 +1,11 @@
 
 import { ethers } from "hardhat";
 import { expect } from 'chai'
-import { BigNumber } from "ethers"
+import { BigNumber, Contract } from "ethers"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 
 function getRandomArbitrary(min: number, max: number) {
-
     return Math.floor(Math.random() * max) + min;
 }
 
@@ -16,9 +15,9 @@ describe("test of ETHPools", function () {
 
 
     const dataETHPool = async () => {
-        const [owner, user1, user2, user3, user4] = await ethers.getSigners();
-        const ETHPoolFactory = await ethers.getContractFactory("ETHPool");
-        const ETHPoolDeploy = await ETHPoolFactory.deploy();
+        const [owner, user1, user2, user3, user4] : SignerWithAddress[] = await ethers.getSigners();
+        const ETHPoolFactory  = await ethers.getContractFactory("ETHPool");
+        const ETHPoolDeploy : Contract = await ETHPoolFactory.deploy();
         const earningsDeposited: BigNumber = ethers.utils.parseEther("10")
 
 
@@ -31,7 +30,7 @@ describe("test of ETHPools", function () {
     }
 
     describe("Test team options", function () {
-        
+
         it('The account you display is the team account', async () => {
             const { owner, user1, ETHPoolDeploy } = await dataETHPool()
 
@@ -72,13 +71,13 @@ describe("test of ETHPools", function () {
 
                 const { user1, ETHPoolDeploy } = await dataETHPool()
 
-                const userdeposit : BigNumber = ethers.utils.parseEther("10")
+                const userdeposit: BigNumber = ethers.utils.parseEther("10")
 
-                const beforeTotalUsersDeposites = await ETHPoolDeploy.totalUserDeposits()
+                await ETHPoolDeploy.totalUserDeposits()
 
                 const tx = await ETHPoolDeploy.connect(user1).depositEthUser({ value: userdeposit })
 
-                const timestamp = (await ethers.provider.getBlock(tx.blockNumber)).timestamp;
+                const timestamp : number = (await ethers.provider.getBlock(tx.blockNumber)).timestamp;
 
                 var depositUser = await ETHPoolDeploy.users(user1.address)
 
@@ -90,7 +89,7 @@ describe("test of ETHPools", function () {
 
 
 
-        describe("Withdra", function () {         
+        describe("Withdra", function () {
 
             it("Restrict if user has not deposited anything", async () => {
                 const { owner, user1, ETHPoolDeploy, earningsDeposited } = await dataETHPool()
@@ -106,7 +105,7 @@ describe("test of ETHPools", function () {
 
                 await ETHPoolDeploy.connect(user1).depositEthUser({ value: earningsDeposited })
 
-                var balanceUsurBefore  =  await ethers.provider.getBalance(user1.address)
+                var balanceUsurBefore : BigNumber = await ethers.provider.getBalance(user1.address)
 
                 var tx = await ETHPoolDeploy.connect(user1).withdraw()
 
@@ -114,10 +113,10 @@ describe("test of ETHPools", function () {
                 const gasPrice: BigNumber = tx.gasPrice
                 var gasCost: BigNumber = gasUsed.mul(gasPrice)
 
-                var balanceUsurAfter  =  await ethers.provider.getBalance(user1.address)
+                var balanceUsurAfter : BigNumber = await ethers.provider.getBalance(user1.address)
 
                 expect(balanceUsurAfter).to.equal(balanceUsurBefore.add(earningsDeposited).sub(gasCost))
-                                
+
             })
 
             // test with 4 users
@@ -176,14 +175,14 @@ describe("test of ETHPools", function () {
 
                     var percentagePool: BigNumber = item.value.mul(eth).div(totalDespositUser)
 
-                    var balanceUserBefore = await ethers.provider.getBalance(item.user.address)
+                    var balanceUserBefore : BigNumber = await ethers.provider.getBalance(item.user.address)
 
                     var earningsAndDeposit: BigNumber =
                         item.value.add(totalReward.mul(percentagePool).div(eth))
 
                     var tx = await ETHPoolDeploy.connect(item.user).withdraw()
 
-                    totalDespositUser = totalDespositUser.sub(item.value)
+                    totalDespositUser  = totalDespositUser.sub(item.value)
 
                     totalReward = totalReward.sub(totalReward.mul(percentagePool).div(eth))
 
@@ -191,7 +190,7 @@ describe("test of ETHPools", function () {
                     const gasPrice: BigNumber = tx.gasPrice
                     var gasCost: BigNumber = gasUsed.mul(gasPrice)
 
-                    var balanceUser = await ethers.provider.getBalance(item.user.address)
+                    var balanceUser : BigNumber = await ethers.provider.getBalance(item.user.address)
 
                     balanceUserBefore = balanceUserBefore.add(earningsAndDeposit.sub(gasCost))
 
@@ -240,7 +239,7 @@ describe("test of ETHPools", function () {
 
                 balanceUser1Before = balanceUser1Before.add(totalReward).add(depositUser).sub(gasCost)
 
-                var balanceUser1After = await ethers.provider.getBalance(user1.address)
+                var balanceUser1After : BigNumber = await ethers.provider.getBalance(user1.address)
 
                 expect(balanceUser1Before).to.equal(balanceUser1After)
                 //------------------------------------------------------------
@@ -255,13 +254,13 @@ describe("test of ETHPools", function () {
 
 
                 //user2 withdrawal
-                var balanceUser2Before = await ethers.provider.getBalance(user2.address)
+                var balanceUser2Before : BigNumber = await ethers.provider.getBalance(user2.address)
                 var tx = await ETHPoolDeploy.connect(user2).withdraw()
                 const gasUsedUser2: BigNumber = (await tx.wait()).gasUsed
                 const gasPriceUser2: BigNumber = tx.gasPrice
                 var gasCostUser2: BigNumber = gasUsedUser2.mul(gasPriceUser2)
 
-                var balanceUser2After = await ethers.provider.getBalance(user2.address)
+                var balanceUser2After : BigNumber = await ethers.provider.getBalance(user2.address)
                 balanceUser2Before = balanceUser2Before.add(depositUser).sub(gasCostUser2)
 
                 expect(balanceUser2Before).to.equal(balanceUser2After)
