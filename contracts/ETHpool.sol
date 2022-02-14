@@ -69,6 +69,7 @@ contract ETHpool {
 
     struct Pool {
         uint poolBalance;
+        uint rewardsBalance;
         uint lastRewardMultiplied;
         uint rewardsCount;
         uint lastRewardTime;
@@ -83,6 +84,7 @@ contract ETHpool {
         Team[msg.sender]._role = 1; // Team member role assigned.
         poolStatus.status = State.Running;
         poolStatus.poolBalance = 0; // Do not transfer at construction time!
+        poolStatus.rewardsBalance = 0; // Do not transfer at construction time
         poolStatus.lastRewardMultiplied = 0;
         poolStatus.rewardsCount = 0;
     }
@@ -92,12 +94,12 @@ contract ETHpool {
 
     // DepositRewards: The team can call this function to deposit rewards to the pool.
     // It will update the last reward of the pool, as rewards*ROUNDING_CONSTANT/PoolBalance
-    function DepositRewards() external payable onlyTeam returns(uint poolbalance) {
-        require( msg.value >= 0, "Rewards must be greater than 0." );
+    function DepositRewards() external payable onlyTeam notPaused notEnded returns(uint poolbalance) {
+        require( msg.value > 0, "Rewards must be greater than 0." );
         if( poolStatus.poolBalance != 0) {
             poolStatus.lastRewardTime = block.timestamp;
             poolStatus.lastRewardMultiplied += (msg.value * ROUNDING_CONSTANT) / poolStatus.poolBalance;
-            poolStatus.poolBalance += msg.value;
+            poolStatus.rewardsBalance += msg.value;
             poolStatus.rewardsCount += 1;
         }
         else{
@@ -110,31 +112,41 @@ contract ETHpool {
     // All network users can perform this function, to become "USERS"
     // TODO: We need to check if the user already exists, and **need to perform first a withdrawal next to a new deposit**.
     // In V2, it will be an automatic claim.
-    // FIXME: At now, users can only deposit only one time.
-    function Stake() external payable {
-        require( UserList[msg.sender]._currentBalance == 0, "Please first perform a withdrawal. We will solve in V2, I promise.");
+
+    function Stake() external notPaused notEnded payable {
         require(msg.value > 0, "Stake must be greater than 0.");
-        UserList[msg.sender]._currentBalance = msg.value;
-        UserList[msg.sender]._compositionAtStartStaking = poolStatus.lastRewardMultiplied;
-        UserList[msg.sender]._timeStaking = block.timestamp;
-        poolStatus.poolBalance += msg.value;
+        if( UserList[msg.sender]._currentBalance == 0 ) { //first staking
+            UserList[msg.sender]._currentBalance = msg.value;
+            UserList[msg.sender]._compositionAtStartStaking = poolStatus.lastRewardMultiplied;
+            UserList[msg.sender]._timeStaking = block.timestamp;
+            poolStatus.poolBalance += msg.value;
+        }
+        else { //User add more funds to their stake
+            uint newStaking = computeRewards()+msg.value; //Add old rewards plus new funds
+            UserList[msg.sender]._currentBalance += newStaking;
+            UserList[msg.sender]._compositionAtStartStaking = poolStatus.lastRewardMultiplied; //compute from now
+            UserList[msg.sender]._timeStaking = block.timestamp;
+            poolStatus.poolBalance += newStaking; //do not forget old funds!
+        }
     }
 
     // Withdraw: Allows users to withdraw their deposits and rewards proportional at the time being.
     // FIXME: At now, only allows full withdrawals.
-    function Withdraw() external onlyUsers returns(bool success){
-        uint allowedToWithdraw = computeRewards() + UserList[msg.sender]._currentBalance;
-        require(poolStatus.poolBalance >= allowedToWithdraw, "Allowed to withdraw must be smaller than the Pool Balance" );
-        poolStatus.poolBalance -= allowedToWithdraw;
+    function Withdraw() external onlyUsers notPaused returns(uint sent){
+        uint balanceFromPool = UserList[msg.sender]._currentBalance; //deposit
+        uint balanceFromRewards = computeRewards();                 // rewards
+        uint allowedToWithdraw =  balanceFromPool+balanceFromRewards ;
+        poolStatus.poolBalance -= balanceFromPool; // From pool
+        poolStatus.rewardsBalance -= balanceFromRewards; // From rewards
         UserList[msg.sender]._currentBalance = 0;
 
         // Did you reentrant? (yes) what did it cost? (everything)
         if (payable(msg.sender).send(allowedToWithdraw)) {        
             delete UserList[msg.sender];
-            return true;
+            return allowedToWithdraw;
         } else {
-            UserList[msg.sender]._currentBalance = allowedToWithdraw;
-            return false;
+            UserList[msg.sender]._currentBalance = balanceFromPool;
+            return 0;
         }
     }
 
