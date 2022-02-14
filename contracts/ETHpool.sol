@@ -58,7 +58,7 @@ contract ETHpool {
 
     struct TeamMember { //there are no specifications for TEAM, so, I understand that can be a lot of people.
         string _name; //It's not necessary
-        uint _role; // 1 for active Team Members
+        bool _role; // True for active Team Members
     }
 
     struct Stakeholder {
@@ -81,7 +81,7 @@ contract ETHpool {
     Pool public poolStatus;
 
     constructor(){
-        Team[msg.sender]._role = 1; // Team member role assigned.
+        Team[msg.sender]._role = true; // Team member role assigned.
         poolStatus.status = State.Running;
         poolStatus.poolBalance = 0; // Do not transfer at construction time!
         poolStatus.rewardsBalance = 0; // Do not transfer at construction time
@@ -156,16 +156,20 @@ contract ETHpool {
     }
 
     //Pool Administration functions
-    function pausePool() public onlyTeam { //If something went wrong, and we need time to proceed.
+    function pausePool() external onlyTeam { //If something went wrong, and we need time to proceed.
         poolStatus.status = State.Paused;
     }
 
-    function endPool() public onlyTeam {
+    function endPool() external onlyTeam {
         poolStatus.status = State.Ended; //If the pool dies. Only allow users to withdraw their funds.
     }
 
-    function resumePool() public onlyTeam {
+    function resumePool() external onlyTeam {
         poolStatus.status = State.Running; //Everything is up and running.
+    }
+
+    function modifyTeam(address teamAddress , bool role) external onlyTeam {
+        Team[teamAddress]._role = role;
     }
 
     //Modifiers section
@@ -175,7 +179,7 @@ contract ETHpool {
     }
 
     modifier onlyTeam() {
-        require(Team[msg.sender]._role == 1, "Only the Team can call this function.");
+        require(Team[msg.sender]._role == true, "Only the Team can call this function.");
         _;
     }
 
