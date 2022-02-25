@@ -28,5 +28,5 @@ Example:
 ![staking pool diagram and theory](https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/StakingPool.png?raw=true)
 
 
-## Interest Calculator for a Period of Time (takes APY as input)
+### Interest Calculator for a Period of Time (takes APY as input)
 https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/Interest%20Calculator.xlsm
