@@ -24,9 +24,9 @@ Example:
 > **A** should get their deposit + all the rewards.
 > **B** should only get their deposit because rewards were sent to the pool before they participated.
 
-#### Mockup and Project Theorical Context
+## Mockup and Project Theorical Context
 ![staking pool diagram and theory](https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/StakingPool.png?raw=true)
 
 
-#### Interest Calculator for a Period of Time (takes APY as input)
+## Interest Calculator for a Period of Time (takes APY as input)
 https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/Interest%20Calculator.xlsm
