@@ -54,6 +54,9 @@ contract PoolManagement is RewardETH {
         require(contributionLimit != 0, "The team needs to set a contribution limit.");
         require(poolFeesSet, "The team needs to set the pool fees.");
         require(msg.value <= contributionLimit, "Max. Contribution Limit exceeded.");
+         require(!reEntrancyMutex);
+        // Prevent other contracts from interacting with this function.
+        require(tx.origin == msg.sender);
         _;
     }
 
@@ -146,8 +149,10 @@ contract PoolManagement is RewardETH {
         // Increase the pool size.
         lockedEther += amountToStake;
         // Send the rwETH.
+        reEntrancyMutex = true;
         mint(msg.sender, rwEtherToMint);
-        
+        reEntrancyMutex = false;
+
         // Transfer fees back to the Team.
         payable(team).transfer(feesCollected);
          
