@@ -5,10 +5,10 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const TestingNFT = await ethers.getContractFactory("TestingNFT");
-  const testingNFT = await TestingNFT.deploy();
+  const PoolManagement = await ethers.getContractFactory("PoolManagement");
+  const poolManagement = await PoolManagement.deploy();
 
-  console.log("Contract address:", testingNFT.address);
+  console.log("Contract address:", poolManagement.address);
 }
 
 main()
