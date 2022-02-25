@@ -24,32 +24,5 @@ Example:
 > **A** should get their deposit + all the rewards.
 > **B** should only get their deposit because rewards were sent to the pool before they participated.
 
-#### Goal
+#### Mockup and Project Theorical Context
 
-Design and code a contract for ETHPool, take all the assumptions you need to move forward.
-
-You can use any development tools you prefer: Hardhat, Truffle, Brownie, Solidity, Vyper.
-
-Useful resources:
-
-- Solidity Docs: https://docs.soliditylang.org/en/v0.8.4
-- Educational Resource: https://github.com/austintgriffith/scaffold-eth
-- Project Starter: https://github.com/abarmat/solidity-starter
-
-### 2) Write tests
-
-Make sure that all your code is tested properly
-
-### 3) Deploy your contract
-
-Deploy the contract to any Ethereum testnet of your preference. Keep record of the deployed address.
-
-Bonus:
-
-- Verify the contract in Etherscan
-
-### 4) Interact with the contract
-
-Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
-
-_You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
