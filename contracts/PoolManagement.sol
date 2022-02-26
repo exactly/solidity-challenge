@@ -9,15 +9,18 @@ contract PoolManagement is RewardETH {
 
     address public team;
     address poolManagement;
+    
+    bytes32 public constant POOL_MANAGER = keccak256("POOL_MANAGER"); // 
           
     uint256 public lockedEther =  0 ether;    
     uint256 daysToRewards;
     uint256 public lastRewardTime;
-    uint256 public totalRewardsInjected;
-    uint256 rewardsToInject;
-    uint256 public contributionLimit; // WEI value.
+    uint256 public totalRewardsInjected; // WEI Value
+    uint256 rewardsToInject; // WEI Value
+    uint256 public contributionLimit; // WEI Value
     uint256 public rewardsInterestPerPeriod;
     uint256 public poolFees;
+    uint256 feesEarnings;
     
     bool public poolLive = false;
     bool public poolFeesSet = false;
@@ -25,23 +28,27 @@ contract PoolManagement is RewardETH {
 
     mapping(address => uint256) public lastTimeInvested;
     mapping(address => uint256) public amountStakedByUser;
+    mapping(address => uint256) public lastAmountStakedByUser;
     mapping(address => uint256) public etherPaidToUser;
     mapping(address => uint256) public rwEtherCollected;
     
 
     // ==================== EVENTS ====================
 
+    event NewManagerAdded(address indexed _address);
+    event ManagerRemoved(address indexed _address);
     event PoolLive(bool _state);
     event RewardsIntervalChanged(uint _time, uint _newInterval);
     event InterestChanged(uint _time, uint _newInterest);
-    event StakeInvestment(address _user, uint _time, uint _amount);
-    event UnstakeInvestment(address _user, uint _time, uint _amount);
+    event StakeInvestment(address indexed _user, uint _time, uint _amount);
+    event UnstakeInvestment(address indexed _user, uint _time, uint _amount);
     event RewardsInjected(uint _time, uint _amount);
         
     constructor() {
         team = msg.sender;
         poolManagement = address(this);
         lastRewardTime = block.timestamp;
+        _setupRole(POOL_MANAGER, msg.sender);
     }
 
 
@@ -54,7 +61,7 @@ contract PoolManagement is RewardETH {
         require(contributionLimit != 0, "The team needs to set a contribution limit.");
         require(poolFeesSet, "The team needs to set the pool fees.");
         require(msg.value <= contributionLimit, "Max. Contribution Limit exceeded.");
-         require(!reEntrancyMutex);
+        require(!reEntrancyMutex);
         // Prevent other contracts from interacting with this function.
         require(tx.origin == msg.sender);
         _;
@@ -73,43 +80,57 @@ contract PoolManagement is RewardETH {
 
     // ============== TEAM FUNCTIONS ==================
 
-    function setPoolLive(bool _live) public onlyOwner {
+    function addPoolManager (address _address) public onlyRole(DEFAULT_ADMIN_ROLE) {
+      grantRole(POOL_MANAGER, _address);
+      emit NewManagerAdded(_address);
+    }
+
+    function removePoolManager (address _address) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(POOL_MANAGER, _address);
+        emit ManagerRemoved(_address);
+    }
+
+    function setPoolLive(bool _live) public onlyRole(POOL_MANAGER) {
         poolLive = _live;
         emit PoolLive(_live);
     }
 
-    function setRewardsInterval(uint _daysToRewards) public onlyOwner {
+    function setRewardsInterval(uint _daysToRewards) public onlyRole(POOL_MANAGER) {
         require(!poolLive, "The pool is currently live.");
         daysToRewards = _daysToRewards * 1 days; // The pool should be paused to perform this action.
         emit RewardsIntervalChanged(block.timestamp, _daysToRewards);
     }
 
-     function setRewardsInterest(uint _rewardsInterest) public onlyOwner {
+     function setRewardsInterest(uint _rewardsInterest) public onlyRole(POOL_MANAGER) {
         require(!poolLive, "The pool is currently live."); // 6 decimals. If 0.001834 rate desired, 0.001834 * (10**6) = 1834.
         rewardsInterestPerPeriod = _rewardsInterest; // Should be calculated with the desired APY taking into account the compound interest. A spreadsheet is provided to do so.
         emit InterestChanged(block.timestamp, rewardsInterestPerPeriod);
     }
 
-    function setContributionLimit(uint _newContributionLimit) public onlyOwner {
+    function setContributionLimit(uint _newContributionLimit) public onlyRole(POOL_MANAGER) {
         require(!poolLive, "The pool is currently live.");
         contributionLimit = _newContributionLimit; // WEI value.
     }
 
-    function setPoolFees(uint _poolFees) public onlyOwner {
+    function setPoolFees(uint _poolFees) public onlyRole(POOL_MANAGER) {
         poolFees = _poolFees; //   // 6 decimals. If 0.001134 rate desired, 0.001134 * (10**6) = 1134. 
         poolFeesSet = true; // // Smaller than the rewardsInterestPerPeriod (If that happens, investors should leave their money more than one period).
     }
 
-    function calculateRewards() public onlyOwner returns(uint) { 
+    function calculateRewards() public onlyRole(POOL_MANAGER) returns(uint) { 
             rewardsToInject = lockedEther * rewardsInterestPerPeriod / (10**6);
             return rewardsToInject; // Will be a WEI value!
     }
 
-    function seeRewardsToInject() public view onlyOwner returns(uint) { 
+    function getRewardsToInject() public view onlyRole(POOL_MANAGER) returns(uint) { 
             return rewardsToInject; // This function is a gas-free way for the team to get the last rewardsToInject calculated value and make the injectRewards process easier.
     }
 
-    function injectRewards() public onlyOwner payable {
+    function getFeeEarnings() public view onlyRole(POOL_MANAGER) returns(uint) { 
+            return feesEarnings;
+    }
+
+    function injectRewards() public onlyRole(POOL_MANAGER) payable {
         require(!poolLive, "The pool is open at this moment.");
         require(msg.value == rewardsToInject,  "The team needs to inject the right amount.");
         
@@ -125,8 +146,6 @@ contract PoolManagement is RewardETH {
     // ============ COMMON USAGE FUNCTIONS ============
 
     function stakeETH() public payable stakeCompliance() {
-        // Prevent other contracts from interacting with this function.
-        require(tx.origin == msg.sender);
 
         lastTimeInvested[msg.sender] = block.timestamp;
 
@@ -135,6 +154,7 @@ contract PoolManagement is RewardETH {
 
         // Store the amount staked by user and its staking state.
         amountStakedByUser[msg.sender] += amountToStake;
+        lastAmountStakedByUser[msg.sender] = amountToStake;
         uint rwEtherToMint;
         
         // Calculate the rwETH in exchange.
@@ -155,6 +175,7 @@ contract PoolManagement is RewardETH {
 
         // Transfer fees back to the Team.
         payable(team).transfer(feesCollected);
+        feesEarnings += feesCollected;
          
         emit StakeInvestment(msg.sender, lastTimeInvested[msg.sender], amountToStake);
     }   
@@ -212,12 +233,16 @@ contract PoolManagement is RewardETH {
 
     function _feesCalc(uint _initialInvestment) internal view returns(uint, uint){
         require(poolFeesSet, "The team needs to set the pool fees.");
-        uint netAmount = _initialInvestment - _initialInvestment * poolFees / (10**6);
-        uint feeCollected = _initialInvestment * poolFees / (10**6);
+        uint netAmount = _initialInvestment - _initialInvestment * poolFees / _sixDecimals();
+        uint feeCollected = _initialInvestment * poolFees / _sixDecimals();
         return(netAmount, feeCollected);
     }
 
+    function _sixDecimals() public pure returns(uint){
+        return 10**6;
+    }
 
+    
 }
 
 
