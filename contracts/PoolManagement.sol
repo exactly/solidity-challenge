@@ -29,6 +29,7 @@ contract PoolManagement is RewardETH {
     mapping(address => uint256) public lastTimeInvested;
     mapping(address => uint256) public amountStakedByUser;
     mapping(address => uint256) public lastAmountStakedByUser;
+    mapping(address => uint256) public lastAmountUnstakedByUser;
     mapping(address => uint256) public etherPaidToUser;
     mapping(address => uint256) public rwEtherCollected;
     
@@ -181,7 +182,7 @@ contract PoolManagement is RewardETH {
     }   
 
     //Input _rwEtherDeposit has 18 decimals.
-    function unstakeETH(uint _rwEtherDeposit) public payable unstakeCompliance(_rwEtherDeposit){
+    function unstakeETH(uint _rwEtherDeposit) public payable unstakeCompliance(_rwEtherDeposit) {
         
         uint amountToUnstake;
 
@@ -196,6 +197,7 @@ contract PoolManagement is RewardETH {
         _burn(msg.sender, _rwEtherDeposit);
 
         rwEtherCollected[msg.sender] -= _rwEtherDeposit;
+        
 
         // Transfer Ether back to the Caller.
         reEntrancyMutex = true;
@@ -205,6 +207,7 @@ contract PoolManagement is RewardETH {
         emit UnstakeInvestment(msg.sender, block.timestamp, amountToUnstake);
 
         // Update the Staking variables.
+        lastAmountUnstakedByUser[msg.sender] = amountToUnstake;
         amountStakedByUser[msg.sender] -= amountToUnstake;
         lockedEther -= amountToUnstake;
     }

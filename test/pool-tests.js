@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
 
 /**
  * Performed with Hardhat tests 
@@ -141,9 +141,55 @@ describe("Pool Contract", function () {
     });
 
     it("Should allow the owner to inject Rewards.", async function () {
-  
-              
-      // expect().to.eq();
+      const rewardsCalculate = await pool.connect(owner).calculateRewards();
+      const contractRewards = await pool.getRewardsToInject();
+      const preRewardsPoolBalance = await pool.lockedEther();
+
+      await pool.connect(owner).setPoolLive(false);
+      const rewardsInjection = await pool.connect(owner).injectRewards( {value: contractRewards} );
+      
+      const calcFinalPoolBalance = preRewardsPoolBalance.add(contractRewards);
+
+      const finalPoolBalance = await pool.lockedEther();
+
+      const wrongAmount = contractRewards.sub(ethers.utils.parseEther('0.00001'));
+
+      expect(pool.connect(owner).injectRewards( {value: wrongAmount} )).to.be.reverted; 
+      expect(finalPoolBalance).to.eq(calcFinalPoolBalance);
+    });
+
+    it("Should allow the users to unstake their ETH + Rewards.", async function () {
+      // Rewards injection
+      const rewardsCalculate = await pool.connect(owner).calculateRewards();
+      const contractRewards = await pool.getRewardsToInject();
+
+      await pool.connect(owner).setPoolLive(false);
+      const rewardsInjection = await pool.connect(owner).injectRewards( {value: contractRewards} );
+      await pool.connect(owner).setPoolLive(true);
+
+      const lockedEther = await pool.lockedEther();
+      const rwETHTotalSupply = await pool.totalSupply();
+      console.log(rwETHTotalSupply);
+
+      const userArwEthBalance = await pool.balanceOf(userA.address);
+      const userBrwEthBalance = await pool.balanceOf(userB.address);
+      console.log(userArwEthBalance);
+      console.log(userBrwEthBalance);
+
+      const userAExpectedETHBalance = userArwEthBalance.mul(lockedEther).div(rwETHTotalSupply);
+      const userBExpectedETHBalance = userBrwEthBalance.mul(lockedEther).div(rwETHTotalSupply);
+      
+      await pool.connect(userA).unstakeETH(userArwEthBalance);
+      const userAUnstakedETH = pool.lastAmountUnstakedByUser(userA.address);
+      await pool.connect(userB).unstakeETH(userBrwEthBalance);
+      const userBUnstakedETH = pool.lastAmountUnstakedByUser(userB.address);
+
+      console.log(userAUnstakedETH);
+      console.log(userBUnstakedETH);
+    
+      expect(userAUnstakedETH).to.eq(userACalcBalance);
+      expect(userBUnstakedETH).to.eq(userBCalcBalance);
+
     });
 
       
