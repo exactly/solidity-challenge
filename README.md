@@ -1,8 +1,4 @@
-# Smart Contract Challenge
-
-## A) Challenge
-
-### 1) Setup a project and create a contract
+# Ether staking and get reward per week
 
 #### Summary
 
@@ -24,32 +20,21 @@ Example:
 > **A** should get their deposit + all the rewards.
 > **B** should only get their deposit because rewards were sent to the pool before they participated.
 
-#### Goal
+# Keep staking principle.
+First week: 
+- A deposit 100, B deposit 150 and T deposit 500
+- A withdraw 100 + 200 = 300 
+- ** B don't withdraw
+- Pool Ether: 100 + 150 + 500 - 300 = 450
+- B reward: 500 * 150 / 250 = 300
 
-Design and code a contract for ETHPool, take all the assumptions you need to move forward.
+Second week:
+- C deposit 100 and T deposit 500
+- Total balance: 450 + 100 + 500 = 1050
+- Then B available withdraw amount ???
+- Not this: 1050 * 150 / (150 + 100) = 630
 
-You can use any development tools you prefer: Hardhat, Truffle, Brownie, Solidity, Vyper.
+** B will be able to withdraw: 
+300 + 500 * 150 / (150 + 100) = 600
 
-Useful resources:
-
-- Solidity Docs: https://docs.soliditylang.org/en/v0.8.4
-- Educational Resource: https://github.com/austintgriffith/scaffold-eth
-- Project Starter: https://github.com/abarmat/solidity-starter
-
-### 2) Write tests
-
-Make sure that all your code is tested properly
-
-### 3) Deploy your contract
-
-Deploy the contract to any Ethereum testnet of your preference. Keep record of the deployed address.
-
-Bonus:
-
-- Verify the contract in Etherscan
-
-### 4) Interact with the contract
-
-Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
-
-_You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
+Test network contract: https://rinkeby.etherscan.io/address/0x00322a7E8e774157B3f160245Ac6365ae024D9f3#code
