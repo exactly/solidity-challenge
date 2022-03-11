@@ -53,3 +53,22 @@ Bonus:
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
 _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
+
+### 5) Solution
+
+#### Assumptions
+
+- Only one team can deposit
+- The team can deposit several times.
+- Users can stake at any time but he/she need to stake before at least 1 deposit happens to get reward.
+- Whenever team deposits stakers' balance increase based on the current stake amount like compound interest.
+
+#### Deploy and Verify
+
+- Verified contract address: [0x6Fe0bFc884371A9B627e4324F556E788e9948237](https://rinkeby.etherscan.io/address/0x6Fe0bFc884371A9B627e4324F556E788e9948237) (rinkeby)
+- To deploy the contract `yarn hardhat run scripts/deploy-ethpool.ts`
+- To verify the contract `yarn hardhat verify 'contract address' --network rinkeby`
+
+#### Interact with contract
+
+`yarn hardhat balance --address 'contract address' --network rinkeby`
