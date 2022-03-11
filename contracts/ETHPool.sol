@@ -13,7 +13,7 @@ contract ETHPool is Ownable {
 
   mapping (address=> uint256) balanceOfUsers;
 
-  uint256 totalBalance;
+  uint256 public totalBalance;
 
   event Deposit(uint256 amount, uint256 date);
   event Withdraw(address to, uint256 amount);
