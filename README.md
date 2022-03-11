@@ -13,6 +13,8 @@ ETHPool provides a service where people can deposit ETH and they will receive we
 - Only the team can deposit rewards.
 - Deposited rewards go to the pool of users, not to individual users.
 - Users should be able to withdraw their deposits along with their share of rewards considering the time when they deposited.
+- Solution shouldn't use `for` or any kind of loops.
+- It should support multiple deposits from the same user. 
 
 Example:
 
