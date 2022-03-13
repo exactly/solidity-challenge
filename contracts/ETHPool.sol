@@ -4,7 +4,6 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 contract ETHPool is Ownable, AccessControl {
     bytes32 public constant TEAM_MEMBER = keccak256("TEAM_MEMBER");
@@ -20,10 +19,10 @@ contract ETHPool is Ownable, AccessControl {
     }
 
     /// @notice Info of Reward Cycle that rewards deposited by the team.
-    /// `amountOfUsers` Amount of Eth that users deposited in the current reward cycle.
+    /// `poolAmount` Amount of Eth that users deposited in the current reward cycle.
     /// `rewardsAmount` Rewards Amount of Eth deposited by the team.
     struct RewardCycleInfo {
-        uint amountOfUsers;
+        uint poolAmount;
         uint rewardsAmount;
     }
 
@@ -50,20 +49,19 @@ contract ETHPool is Ownable, AccessControl {
     /// @notice deposit Eth to the pool
     function withdraw() public {
         UserInfo storage user = userInfo[msg.sender];
-        require(user.amount > 0);
-        user.pendingRewards += getRewards(user.amount, user.lastRewardCycleId, curRewardCycleId);
-
-        rewardCycle[curRewardCycleId].amountOfUsers -= user.amount;
         uint amount = user.amount;
+        require(amount > 0);
+        user.pendingRewards += getRewards(amount, user.lastRewardCycleId, curRewardCycleId);
+
+        rewardCycle[curRewardCycleId].poolAmount -= amount;
         uint rewards = user.pendingRewards;
-        user.amount = 0;
-        user.pendingRewards = 0;
+        user.amount = user.pendingRewards = 0;
         user.lastRewardCycleId = curRewardCycleId;
         
         (bool success, ) = msg.sender.call{
             value: amount + rewards
         }("");
-        require(success, "Transfer failed.");
+        require(success, "EthPool: Transfer failed.");
         emit Withdraw(msg.sender, amount, rewards);
     }
 
@@ -73,15 +71,16 @@ contract ETHPool is Ownable, AccessControl {
         user.pendingRewards += getRewards(user.amount, user.lastRewardCycleId, curRewardCycleId);
         userInfo[msg.sender].amount += msg.value;
         userInfo[msg.sender].lastRewardCycleId = curRewardCycleId;
-        rewardCycle[curRewardCycleId].amountOfUsers += msg.value;
+        rewardCycle[curRewardCycleId].poolAmount += msg.value;
         emit Deposit(msg.sender, msg.value);
     }
 
     /// @notice team deposit rewards
     function depositRewards() public payable onlyRole(TEAM_MEMBER) {
         RewardCycleInfo storage curRewardCycle = rewardCycle[curRewardCycleId];
+        require(curRewardCycle.poolAmount > 0, "EthPool: empty pool");
         curRewardCycle.rewardsAmount = msg.value;
-        rewardCycle[curRewardCycleId+1].amountOfUsers = curRewardCycle.amountOfUsers;
+        rewardCycle[curRewardCycleId+1].poolAmount = curRewardCycle.poolAmount;
         curRewardCycleId ++;
         emit DepositRewards(msg.sender, msg.value);
     }
@@ -89,6 +88,6 @@ contract ETHPool is Ownable, AccessControl {
     /// @notice withdraw deposits along with their share of rewards considering the time when they deposited
     function getRewards(uint amount, uint startCycleId, uint endCycleId) internal view returns (uint rewards) {
         for (uint i = startCycleId; i < endCycleId; i ++)
-            rewards += amount * rewardCycle[i].rewardsAmount / rewardCycle[i].amountOfUsers;
+            rewards += amount * rewardCycle[i].rewardsAmount / rewardCycle[i].poolAmount;
     }
 }

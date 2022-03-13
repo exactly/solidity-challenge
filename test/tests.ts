@@ -28,6 +28,11 @@ describe('ETHPool', async () => {
       const options = {value: ethers.utils.parseEther("100.0")}
       await expect( ETHPool.connect(alice).functions.depositRewards(options)).to.be.reverted;
     })
+
+    it('should reject if pool is empty', async () => {
+      const options = {value: ethers.utils.parseEther("100.0")}
+      await expect( ETHPool.functions.depositRewards(options)).to.be.reverted;
+    })
   }),  
   describe('User', async ()=> {
     it('should accept deposits from users', async () => {
@@ -81,7 +86,7 @@ describe('ETHPool', async () => {
       // A deposits =>  T deposits
       // B deposits =>  T deposits 
       // A deposits, C deposits => T deposits
-      // A withraws
+      // A withraws, A deposits, A withdraws 
       await expect(await ETHPool.connect(alice).functions.deposit({value: ethers.utils.parseEther("100.0")})).to.changeEtherBalance(alice, ethers.utils.parseEther("-100.0") );
       await ETHPool.functions.depositRewards({value: ethers.utils.parseEther("100.0")});
       await expect(await ETHPool.connect(bob).functions.deposit({value: ethers.utils.parseEther("100.0")})).to.changeEtherBalance(bob, ethers.utils.parseEther("-100.0") );
@@ -90,6 +95,9 @@ describe('ETHPool', async () => {
       await expect(await ETHPool.connect(carol).functions.deposit({value: ethers.utils.parseEther("100.0")})).to.changeEtherBalance(carol, ethers.utils.parseEther("-100.0") );
       await ETHPool.functions.depositRewards({value: ethers.utils.parseEther("100.0")});
       await expect(await ETHPool.connect(alice).functions.withdraw()).to.changeEtherBalance(alice, ethers.utils.parseEther("400.0") );
+
+      await expect(await ETHPool.connect(alice).functions.deposit({value: ethers.utils.parseEther("100.0")})).to.changeEtherBalance(alice, ethers.utils.parseEther("-100.0") );
+      await expect(await ETHPool.connect(alice).functions.withdraw()).to.changeEtherBalance(alice, ethers.utils.parseEther("100.0") ); // shouldn't give rewards at this time
     })
   })
 })
