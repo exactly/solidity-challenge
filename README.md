@@ -52,4 +52,69 @@ Bonus:
 
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
-_You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
+## Install & Deploy
+#### Installation
+```
+npm install
+```
+
+#### Deployment
+```
+npx hardhat run --network kovan scripts/deploy.ts
+```
+Deployed & Verified At:
+```
+https://kovan.etherscan.io/address/0xdDf1c0f3137e3bdae8DCe95F70D99550A77E6247#code
+```
+
+## Test
+```
+npx hardhat test
+````
+
+#### Test Result
+```
+  ETHPool
+    Team
+      ✓ should reject not-owner rewards
+    User
+      ✓ should accept deposits from users
+      ✓ should accept withdrawals from users
+      ✓ should reject withdrawls without deposit
+      ✓ should give rewards to alice
+      ✓ should split rewards 25% alice and 75% bob 
+      ✓ should not give double rewards
+      ✓ should give correct rewards after some rewards cycles
+```
+
+#### Gas Report
+```
+·-------------------------------|---------------------------|-------------|-----------------------------·
+|      Solc version: 0.8.7      ·  Optimizer enabled: true  ·  Runs: 200  ·  Block limit: 12000000 gas  │
+································|···························|·············|······························
+|  Methods                                                                                              │
+·············|··················|·············|·············|·············|···············|··············
+|  Contract  ·  Method          ·  Min        ·  Max        ·  Avg        ·  # calls      ·  eur (avg)  │
+·············|··················|·············|·············|·············|···············|··············
+|  ETHPool   ·  deposit         ·      40096  ·      89152  ·      73429  ·           22  ·          -  │
+·············|··················|·············|·············|·············|···············|··············
+|  ETHPool   ·  depositRewards  ·      76788  ·      93888  ·      88188  ·            6  ·          -  │
+·············|··················|·············|·············|·············|···············|··············
+|  ETHPool   ·  withdraw        ·      38146  ·      73688  ·      61582  ·           13  ·          -  │
+·············|··················|·············|·············|·············|···············|··············
+|  Deployments                  ·                                         ·  % of limit   ·             │
+································|·············|·············|·············|···············|··············
+|  ETHPool                      ·          -  ·          -  ·     944627  ·        7.9 %  ·          -  │
+·-------------------------------|-------------|-------------|-------------|---------------|-------------·
+
+```
+
+## Tasks
+`eth-balance`
+Hardhat task to query the total amount of ETH held in the contract
+
+```
+npx hardhat eth-balance --pool 0xdDf1c0f3137e3bdae8DCe95F70D99550A77E6247
+
+
+```
