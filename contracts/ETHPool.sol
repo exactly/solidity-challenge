@@ -46,7 +46,7 @@ contract ETHPool is Ownable, AccessControl {
         _setupRole(TEAM_MEMBER, _team);
     }
 
-    /// @notice deposit Eth to the pool
+    /// @notice withdraw deposits along with their share of rewards considering the time when they deposited
     function withdraw() public {
         UserInfo storage user = userInfo[msg.sender];
         uint amount = user.amount;
@@ -85,7 +85,13 @@ contract ETHPool is Ownable, AccessControl {
         emit DepositRewards(msg.sender, msg.value);
     }
 
-    /// @notice withdraw deposits along with their share of rewards considering the time when they deposited
+    /// @notice get pending rewards for user
+    function getPendingRewards(address account) external view returns (uint pendingRewards) {
+        UserInfo storage user = userInfo[account];
+        pendingRewards = user.pendingRewards + getRewards(user.amount, user.lastRewardCycleId, curRewardCycleId);
+    }
+
+    /// @notice get rewards between cycles
     function getRewards(uint amount, uint startCycleId, uint endCycleId) internal view returns (uint rewards) {
         for (uint i = startCycleId; i < endCycleId; i ++)
             rewards += amount * rewardCycle[i].rewardsAmount / rewardCycle[i].poolAmount;

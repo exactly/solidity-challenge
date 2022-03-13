@@ -64,7 +64,7 @@ npx hardhat run --network kovan scripts/deploy.ts
 ```
 Deployed & Verified At:
 ```
-https://kovan.etherscan.io/address/0xdDf1c0f3137e3bdae8DCe95F70D99550A77E6247#code
+https://kovan.etherscan.io/address/0x9Ad4f4356A324436457d9544272E7F388AddfdFF#code
 ```
 
 ## Test
@@ -114,7 +114,7 @@ npx hardhat test
 Hardhat task to query the total amount of ETH held in the contract
 
 ```
-npx hardhat eth-balance --pool 0xdDf1c0f3137e3bdae8DCe95F70D99550A77E6247
+npx hardhat eth-balance --pool 0x9Ad4f4356A324436457d9544272E7F388AddfdFF
 
 
 ```
