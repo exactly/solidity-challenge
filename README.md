@@ -52,4 +52,46 @@ Bonus:
 
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
-_You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
+## Install & Deploy
+#### Installation
+```
+npm install
+```
+
+#### Deployment
+```
+npx hardhat run --network kovan scripts/deploy.ts
+```
+Deployed & Verified At:
+```
+https://ropsten.etherscan.io/address/0x2DD88AF1687e47882e83EBD2726Caf1dd17585Aa#code
+```
+
+## Test
+```
+npx hardhat test
+````
+
+#### Test Result
+```
+  ETHPool
+    Team
+      ✓ should reject not-owner rewards
+    User
+      ✓ should accept deposits from users
+      ✓ should accept withdrawals from users
+      ✓ should reject withdrawls without deposit
+      ✓ should give rewards to alice
+      ✓ should split rewards 25% alice and 75% bob 
+      ✓ should not give double rewards
+      ✓ should give correct rewards after some rewards cycles
+```
+
+
+## Tasks
+`balance`
+Hardhat task to query the total amount of ETH held in the contract
+
+```
+npx hardhat balance --pool 0x2DD88AF1687e47882e83EBD2726Caf1dd17585Aa
+```
