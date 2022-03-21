@@ -35,14 +35,26 @@ contract ETHPool {
     return _team;
   }
 
-  function deposit(uint256 newReward) internal {
+  receive() external payable {
+    require(msg.value > 0, "deposit should be positive");
+
+    if(isTeam()) {
+      // team deposit reward
+      depositReward(msg.value);
+    } else {
+      // user deposit eth
+      deposit(msg.value);
+    }
+  }
+
+  function depositReward(uint256 newReward) internal {
     require(_totalStaked > 0, "No one has staked yet");
 
     _totalReward = _totalReward + newReward;
     _totalAccured = _totalAccured + newReward * MAGNITUDE / _totalStaked;
   }
 
-  function stake(uint256 stakeAmount) public {
+  function deposit(uint256 stakeAmount) internal {
     if(_stakedAmount[msg.sender] > 0)
       _accured[msg.sender] = currentRewards(msg.sender);
 
@@ -52,32 +64,7 @@ contract ETHPool {
     _stakeEntry[msg.sender] = _totalAccured;
   }
 
-  receive() external payable {
-    require(msg.value > 0, "deposit should be positive");
-
-    if(isTeam()) {
-      // team deposit reward
-      deposit(msg.value);
-    } else {
-      // user deposit eth
-      stake(msg.value);
-    }
-  }
-
-  function unstakeAll() public {
-    require(_stakedAmount[msg.sender] > 0, "You have no stake");
-
-    _accured[msg.sender] = currentRewards(msg.sender);
-    uint256 unstakeAmount = _stakedAmount[msg.sender];
-    _totalStaked = _totalStaked - unstakeAmount;
-    _stakedAmount[msg.sender] = 0;
-
-    _stakeEntry[msg.sender] = _totalAccured;
-
-    address payable receiver = payable(msg.sender);
-    receiver.transfer(unstakeAmount);
-  }
-
+  // harvest claims all rewards at once
   function harvest() public {
     require(currentRewards(msg.sender) > 0, "Insufficient accured reward");
 
@@ -88,6 +75,31 @@ contract ETHPool {
     
     address payable receiver = payable(msg.sender);
     receiver.transfer(reward);
+  }
+
+  // withdraw 'withdrawAmount' ETH from POOL, claim rewards proportionally
+  function withdraw(uint256 withdrawAmount) public {
+    require(withdrawAmount > 0, "amount should be positive");
+    require(_stakedAmount[msg.sender] >= withdrawAmount, "amount exceeds staked");
+
+    _accured[msg.sender] = currentRewards(msg.sender);
+
+    uint256 withdrawRewards = withdrawAmount * _accured[msg.sender] / _stakedAmount[msg.sender];
+
+    _totalStaked = _totalStaked - withdrawAmount;
+    _stakedAmount[msg.sender] = _stakedAmount[msg.sender] - withdrawAmount;
+    _totalReward = _totalReward - withdrawRewards;
+    _accured[msg.sender] = _accured[msg.sender] - withdrawRewards;
+    _stakeEntry[msg.sender] = _totalAccured;
+
+    address payable receiver = payable(msg.sender);
+    receiver.transfer(withdrawAmount + withdrawRewards);
+  }
+
+  // withdraw all ETH from POOL, claim all rewards
+  function withdrawAll() public {
+    require(_stakedAmount[msg.sender] > 0, "You have no stake");
+    withdraw(_stakedAmount[msg.sender]);
   }
 
   function currentRewards(address addy) public view returns (uint256) {
