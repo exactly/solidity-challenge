@@ -58,7 +58,7 @@ describe("ETHPool", function () {
       .to.equal(ethers.utils.parseEther("150"));
   });
 
-  it("Should be reward to only A", async function () {
+  it("Should be rewarded to only A", async function () {
     await ASigner.sendTransaction({
       to: poolAddr,
       value: ethers.utils.parseEther("100")
@@ -76,5 +76,58 @@ describe("ETHPool", function () {
       .to.equal(ethers.utils.parseEther("200"));
     expect(await pool.currentRewards(B))
       .to.equal(ethers.utils.parseEther("0"));
+  });
+
+  it("Should deposit multiple & withdraw partially", async function () {
+    await ASigner.sendTransaction({
+      to: poolAddr,
+      value: ethers.utils.parseEther("50")
+    });
+    await ASigner.sendTransaction({
+      to: poolAddr,
+      value: ethers.utils.parseEther("50")
+    });
+    await TSigner.sendTransaction({
+      to: poolAddr,
+      value: ethers.utils.parseEther("200")
+    });
+
+    let prevBalance, withdrawTx, gasPrice, gasUsed, txFee, nextBalance;
+
+    prevBalance = await ASigner.getBalance();
+    withdrawTx = await pool.connect(ASigner).withdraw(ethers.utils.parseEther("25"));
+    gasPrice = withdrawTx.gasPrice;
+    withdrawTx = await withdrawTx.wait();
+    gasUsed = withdrawTx.gasUsed;
+    txFee = BigNumber.from(gasPrice * gasUsed);
+    nextBalance = await ASigner.getBalance();
+    expect(nextBalance.sub(prevBalance).add(txFee)).to.equal(ethers.utils.parseEther("75"));
+
+    expect(await pool.currentStake(A)).to.equal(ethers.utils.parseEther("75"));
+    expect(await pool.currentRewards(A)).to.equal(ethers.utils.parseEther("150"));
+
+    prevBalance = await ASigner.getBalance();
+    withdrawTx = await pool.connect(ASigner).withdraw(ethers.utils.parseEther("50"));
+    gasPrice = withdrawTx.gasPrice;
+    withdrawTx = await withdrawTx.wait();
+    gasUsed = withdrawTx.gasUsed;
+    txFee = BigNumber.from(gasPrice * gasUsed);
+    nextBalance = await ASigner.getBalance();
+    expect(nextBalance.sub(prevBalance).add(txFee)).to.equal(ethers.utils.parseEther("150"));
+
+    expect(await pool.currentStake(A)).to.equal(ethers.utils.parseEther("25"));
+    expect(await pool.currentRewards(A)).to.equal(ethers.utils.parseEther("50"));
+
+    prevBalance = await ASigner.getBalance();
+    withdrawTx = await pool.connect(ASigner).withdrawAll();
+    gasPrice = withdrawTx.gasPrice;
+    withdrawTx = await withdrawTx.wait();
+    gasUsed = withdrawTx.gasUsed;
+    txFee = BigNumber.from(gasPrice * gasUsed);
+    nextBalance = await ASigner.getBalance();
+    expect(nextBalance.sub(prevBalance).add(txFee)).to.equal(ethers.utils.parseEther("75"));
+
+    expect(await pool.currentStake(A)).to.equal(ethers.utils.parseEther("0"));
+    expect(await pool.currentRewards(A)).to.equal(ethers.utils.parseEther("0"));
   });
 });
