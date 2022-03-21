@@ -1,0 +1,31 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="InstalledPackageInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="9">
+            <item index="0" class="java.lang.String" itemvalue="dj-database-url" />
+            <item index="1" class="java.lang.String" itemvalue="django-heroku" />
+            <item index="2" class="java.lang.String" itemvalue="whitenoise" />
+            <item index="3" class="java.lang.String" itemvalue="gunicorn" />
+            <item index="4" class="java.lang.String" itemvalue="django-robots" />
+            <item index="5" class="java.lang.String" itemvalue="jsonfield" />
+            <item index="6" class="java.lang.String" itemvalue="Pillow" />
+            <item index="7" class="java.lang.String" itemvalue="djangorestframework-simplejwt" />
+            <item index="8" class="java.lang.String" itemvalue="xmltodict" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="feed_items" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="TsLint" enabled="true" level="WARNING" enabled_by_default="true" />
+  </profile>
+</component>
