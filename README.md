@@ -48,6 +48,8 @@ Bonus:
 
 - Verify the contract in Etherscan
 
+https://rinkeby.etherscan.io/address/0x697DD2d0a31352d960E14dfaB381739404406dE7
+
 ### 4) Interact with the contract
 
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
