@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract PoolBase is AccessControl, ReentrancyGuard{
 
-
     bytes32 public constant POOL_MANAGER = keccak256("POOL_MANAGER"); // 
 
     // Events
@@ -40,7 +39,6 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         _;
     }
 
-
     // ====== Pool Clearance  ======
     function addPoolManager (address _address) public onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(POOL_MANAGER, _address);
@@ -50,12 +48,16 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     function removePoolManager (address _address) public onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(POOL_MANAGER, _address);
         emit ManagerRemoved(_address);
+    }
+
+    function updateDataStorageAddress(address _newAddress) public onlyRole(POOL_MANAGER){
+        dataStorage = DataStorageInterface(_newAddress);
     }    
 
     // ====== Pool Environmental Variables  ======
     function setPoolBaseAddress() public onlyCurrentGuardian{
         dataStorage.setBoolStorage(keccak256(abi.encodePacked("contract_exists", address(this))), true);
-        dataStorage.setAddressStorage(keccak256(abi.encodePacked("PoolBase_contract", address(this))), address(this));
+        dataStorage.setAddressStorage(keccak256(abi.encodePacked("contract__address", "PoolBase")), address(this));
     }
 
     /// @dev Toggles the Pool Investing Switch. 
@@ -104,12 +106,18 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     } 
 
     // ====== Pool Management Variables  ======   
-    function injectRewards() public onlyRole(POOL_MANAGER) nonReentrant() payable {
-        uint doSth = 0;
-        doSth * 1;
+
+
+    // ====== Pool Data Query  ======
+    function getContractAddress(string memory _contractName) internal view returns(address){
+        bytes32 addressTag = keccak256(abi.encodePacked("contract__address", _contractName));
+        address contractAddress = dataStorage.getAddressStorage(addressTag);
+        require(contractAddress == address(0x0), "Contract address not found.");
+        return contractAddress;
     }
 
-    
+
+
 
 
 
