@@ -25,6 +25,7 @@ Example:
 > **B** should only get their deposit because rewards were sent to the pool before they participated.
 
 ## B) Mockup and Project Theorical Context
+For tracking, organization and security purposes, the balances of the tokens are tracked on a separate contract.
 ![staking pool diagram and theory](https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/StakingPool.png?raw=true)
 
 
