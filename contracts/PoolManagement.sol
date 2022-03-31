@@ -182,7 +182,7 @@ contract PoolManagement is RewardETH {
     }   
 
     //Input _rwEtherDeposit has 18 decimals.
-    function unstakeETH(uint _rwEtherDeposit) public payable unstakeCompliance(_rwEtherDeposit) {
+    function unstakeETH(uint _rwEtherDeposit) public payable unstakeCompliance(_rwEtherDeposit) nonReentrant() {
         
         uint amountToUnstake;
 
@@ -203,7 +203,7 @@ contract PoolManagement is RewardETH {
         reEntrancyMutex = true;
         payable(msg.sender).transfer(amountToUnstake);
         reEntrancyMutex = false;
-         
+                
         emit UnstakeInvestment(msg.sender, block.timestamp, amountToUnstake);
 
         // Update the Staking variables.
