@@ -6,7 +6,6 @@ import "./RewardETH.sol";
 contract PoolManagement is RewardETH {
 
     // ================= VARIABLES ====================   
-
     address public team;
     address poolManagement;
     
@@ -21,11 +20,12 @@ contract PoolManagement is RewardETH {
     uint256 public rewardsInterestPerPeriod;
     uint256 public poolFees;
     uint256 feesEarnings;
+    uint256 public rwETH_Threshold;
+    uint256 public rwEthCirc;
     
     bool public poolLive = false;
     bool public poolFeesSet = false;
-    bool reEntrancyMutex = false;
-
+    
     mapping(address => uint256) public lastTimeInvested;
     mapping(address => uint256) public amountStakedByUser;
     mapping(address => uint256) public lastAmountStakedByUser;
@@ -44,12 +44,16 @@ contract PoolManagement is RewardETH {
     event StakeInvestment(address indexed _user, uint _time, uint _amount);
     event UnstakeInvestment(address indexed _user, uint _time, uint _amount);
     event RewardsInjected(uint _time, uint _amount);
-        
+    
+    /// @dev There is an initial mint amount of rewards while deploying to get a liquid supply of tokens.
+    /// @dev The ever first "lastRewardTime" registered will be the deployment time, afterwards this will be overwritten by the next rewards timestamps.
+    /// @dev The team should also set a Threshold of rwETH balance of the contract to assure its supply while its operating.
     constructor() {
         team = msg.sender;
         poolManagement = address(this);
         lastRewardTime = block.timestamp;
         _setupRole(POOL_MANAGER, msg.sender);
+        mint(poolManagement, 10 * 10**decimals()    );
     }
 
 
@@ -62,7 +66,6 @@ contract PoolManagement is RewardETH {
         require(contributionLimit != 0, "The team needs to set a contribution limit.");
         require(poolFeesSet, "The team needs to set the pool fees.");
         require(msg.value <= contributionLimit, "Max. Contribution Limit exceeded.");
-        require(!reEntrancyMutex);
         // Prevent other contracts from interacting with this function.
         require(tx.origin == msg.sender);
         _;
@@ -72,7 +75,6 @@ contract PoolManagement is RewardETH {
         require(poolLive, "The pool is currently paused.");
         require(amountStakedByUser[msg.sender] > 0, "You haven't staked any Ethers.");
         require(balanceOf(msg.sender) >= _rwEtherDeposit, "You don't have that amount of rwEther in your account.");
-        require(!reEntrancyMutex);
         // Prevent other contracts from interacting with this function.
         require(tx.origin == msg.sender);
         _;
@@ -80,6 +82,13 @@ contract PoolManagement is RewardETH {
 
 
     // ============== TEAM FUNCTIONS ==================
+
+    /// @dev Inmediately after deploying tasks to do by the team to get this contract operational:
+    /// @dev 1) Should set Rewards Interval, Rewards Interest, rwETH Threshold & Contribution Limit, Pool Fees.
+    /// @dev NOTE: The Contr. Limit. can't be higher than the threshold. It is recommended to define the Threshold as x times the Contr Limit (e.g 2x)
+    /// @dev NOTE: All the Token Values are expressed with 18 decimals (e.g. WEI for Ether)
+    /// @dev 2) Should set the Pool Live
+    /// @dev 3) OPTIONAL: Add Pool Managers to help with this tasks.
 
     function addPoolManager (address _address) public onlyRole(DEFAULT_ADMIN_ROLE) {
       grantRole(POOL_MANAGER, _address);
@@ -108,9 +117,11 @@ contract PoolManagement is RewardETH {
         emit InterestChanged(block.timestamp, rewardsInterestPerPeriod);
     }
 
-    function setContributionLimit(uint _newContributionLimit) public onlyRole(POOL_MANAGER) {
+    function setContrLimitAndTheshold(uint _newContributionLimit, uint _newThreshold) public onlyRole(POOL_MANAGER) {
         require(!poolLive, "The pool is currently live.");
+        require(_newContributionLimit < _newThreshold, "The Threshold needs to be higher than the Contribution Limit.");
         contributionLimit = _newContributionLimit; // WEI value.
+        rwETH_Threshold = _newThreshold; // WEI value.
     }
 
     function setPoolFees(uint _poolFees) public onlyRole(POOL_MANAGER) {
@@ -131,7 +142,7 @@ contract PoolManagement is RewardETH {
             return feesEarnings;
     }
 
-    function injectRewards() public onlyRole(POOL_MANAGER) payable {
+    function injectRewards() public onlyRole(POOL_MANAGER) nonReentrant() payable {
         require(!poolLive, "The pool is open at this moment.");
         require(msg.value == rewardsToInject,  "The team needs to inject the right amount.");
         
@@ -143,12 +154,24 @@ contract PoolManagement is RewardETH {
         emit RewardsInjected(lastRewardTime, msg.value);
     }
 
+    function updateCircRewardEther() public onlyRole(POOL_MANAGER) returns(uint256){
+        rwEthCirc = _updateCircRewardEther();
+        return rwEthCirc;
+    }
+
     
     // ============ COMMON USAGE FUNCTIONS ============
 
-    function stakeETH() public payable stakeCompliance() {
+    function stakeETH() public payable stakeCompliance() nonReentrant() {
+        // Update Total Amount of rwEth circulating.
+        rwEthCirc = _updateCircRewardEther();
 
         lastTimeInvested[msg.sender] = block.timestamp;
+
+        /// @dev automatically before excecuting any further code, the function checks if the balance respects the theshold.
+        if (balanceOf(poolManagement) < rwETH_Threshold ){
+            mint(poolManagement, rwETH_Threshold);
+        }
 
         // Actual Stake Investment & Fees Collected by the Team.
         (uint amountToStake, uint feesCollected) = _feesCalc(msg.value);
@@ -159,8 +182,13 @@ contract PoolManagement is RewardETH {
         uint rwEtherToMint;
         
         // Calculate the rwETH in exchange.
-        if(totalSupply() != 0){
-            rwEtherToMint = amountToStake  *  totalSupply() / lockedEther;
+        /// @dev It is taken into account the rewards circulating instead of the TotalSupply to both prevent running out from rwEth to provide 
+        /// @dev and also to track the real market price based in its available supply (the circulating one).
+        /// @dev If no rwEther is circulating (outside this contract) the price should be 1:1
+        /// @dev When there is rwEth in circulation, the price will be calculated with the ratio of rwEthCirculating/ETHlocked.
+
+        if(rwEthCirc > 0){
+            rwEtherToMint = amountToStake  * rwEthCirc / lockedEther;
             rwEtherCollected[msg.sender] += rwEtherToMint;            
         } else {
             rwEtherToMint = amountToStake / 1 ;
@@ -169,11 +197,12 @@ contract PoolManagement is RewardETH {
 
         // Increase the pool size.
         lockedEther += amountToStake;
-        // Send the rwETH.
-        reEntrancyMutex = true;
+        // rwETH management.
+        /// @dev If the desired amount to mint 
+        if (rwEtherToMint < balanceOf(poolManagement))
+        ...
         mint(msg.sender, rwEtherToMint);
-        reEntrancyMutex = false;
-
+        
         // Transfer fees back to the Team.
         payable(team).transfer(feesCollected);
         feesEarnings += feesCollected;
@@ -198,11 +227,8 @@ contract PoolManagement is RewardETH {
 
         rwEtherCollected[msg.sender] -= _rwEtherDeposit;
         
-
         // Transfer Ether back to the Caller.
-        reEntrancyMutex = true;
         payable(msg.sender).transfer(amountToUnstake);
-        reEntrancyMutex = false;
                 
         emit UnstakeInvestment(msg.sender, block.timestamp, amountToUnstake);
 
@@ -241,8 +267,13 @@ contract PoolManagement is RewardETH {
         return(netAmount, feeCollected);
     }
 
-    function _sixDecimals() public pure returns(uint){
+    function _sixDecimals() internal pure returns(uint){
         return 10**6;
+    }
+    
+    function _updateCircRewardEther() internal returns(uint){
+        rwEthCirc = totalSupply() - balanceOf(poolManagement);
+        return rwEthCirc;
     }
 
     
