@@ -25,9 +25,12 @@ Example:
 > **B** should only get their deposit because rewards were sent to the pool before they participated.
 
 ## B) Mockup and Project Theorical Context
-For tracking, organization and security purposes, the balances of the tokens are tracked on a separate contract.
+> The interest period can be modified just by injecting rewards in a different time-range.
+> The amount to inject is calculated with a contract function that takes as input the fixed interest rate for the current interest period.
+
 ![staking pool diagram and theory](https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/StakingPool.png?raw=true)
 
+## C) Contract Relationships Tree
 
 ### Interest Calculator for a Period of Time (takes APY as input)
 https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/Interest%20Calculator.xlsm
