@@ -1,0 +1,11 @@
+PoolManagement Non Used Implementations:
+    ☐ Rewards Calculation
+    ☐ Computation of earned fees
+
+PoolBase:
+    Functions to Implement:
+        ☐ injectRewards (missing: pool balance, Ether and rwEther on the network).
+
+InvestingTokens:
+    ☐ modifiers of deposit and withdrawal compliances
+

@@ -21,6 +21,8 @@ interface DataStorageInterface {
     function setBoolStorage(bytes32 _id, bool _value) external;
     function setAddressStorage(bytes32 _id, address _value) external; 
     function setBytes32Storage(bytes32 _id, bytes32 _value) external;
+    function increaseUintStorage(bytes32 _id, uint256 _increment) external;
+    function decreaseUintStorage(bytes32 _id, uint256 _decrement) external;        
 
     // ====== Storage Mappings Deleters ======
     function deleteUintStorage(bytes32 _id) external;

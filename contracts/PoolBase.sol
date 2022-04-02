@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
+/// @title PoolBase, Base Pool Management Contract,
+/// @author liorabadi
+/// @notice Base control and management of the pool operation.
+
 import "./interfaces/DataStorageInterface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -24,6 +28,7 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         dataStorage = DataStorageInterface(_dataStorageAddress);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(POOL_MANAGER, msg.sender);
+        _setPoolBaseAddress();
     }
 
 
@@ -54,10 +59,12 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         dataStorage = DataStorageInterface(_newAddress);
     }    
 
-    // ====== Pool Environmental Variables  ======
-    function setPoolBaseAddress() public onlyCurrentGuardian{
+    // ====== Pool Variables Setters  ======
+    /// @dev Store this contract address and existance on the main storage.
+    /// @notice Called while deploying the contract. 
+    function _setPoolBaseAddress() private {
         dataStorage.setBoolStorage(keccak256(abi.encodePacked("contract_exists", address(this))), true);
-        dataStorage.setAddressStorage(keccak256(abi.encodePacked("contract__address", "PoolBase")), address(this));
+        dataStorage.setAddressStorage(keccak256(abi.encodePacked("contract_address", "PoolBase")), address(this));
     }
 
     /// @dev Toggles the Pool Investing Switch. 
@@ -66,6 +73,13 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         bytes32 statusTag = keccak256(abi.encodePacked("isPoolLive"));
         dataStorage.setBoolStorage(statusTag, _live);
     }
+
+    /// @dev Sets the Pool Maximium size expressed on ether.
+    /// @param _maxSize is a WEI value (or BigInt / BigNumber).
+    function setPoolMaxSize(uint _maxSize) public onlyRole(POOL_MANAGER) {
+        bytes32 poolMaxSizeTag = keccak256(abi.encodePacked("poolMaxSize"));
+        dataStorage.setUintStorage(poolMaxSizeTag, _maxSize);
+    }    
 
     /// @dev Set the interval in days of the rewards period.
     function setRewardsInterval(uint _daysToRewards) public onlyRole(POOL_MANAGER) {
@@ -91,6 +105,15 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         dataStorage.setUintStorage(contrLimitTag, _newContrLimit);
     }
 
+    /// @dev Set the min. contribution allowed for each user.
+    /// @param _newMinContr is a WEI value.
+    function setMinContribution (uint _newMinContr) public onlyRole(POOL_MANAGER){
+        require(dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
+        bytes32 minContrTag = keccak256(abi.encodePacked("minContribution"));
+        dataStorage.setUintStorage(minContrTag, _newMinContr);
+    }
+    
+
     /// @dev Set the pool fees fraction that the pool charges for each deposit.
     /// @param _poolFees within the storage has 6 decimals.
     /// @notice E.G. If 0.001235 fees fraction are desired, 0.001235 * (10**6) = 1235.
@@ -102,13 +125,11 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         
         dataStorage.setUintStorage(poolFeesTag, _poolFees);
         dataStorage.setBoolStorage(poolFeesSetTag, true);
-        
     } 
 
-    // ====== Pool Management Variables  ======   
+    // ====== Pool Data Getters  ======
+    /// @dev Getters for each pool variable.
 
-
-    // ====== Pool Data Query  ======
     function getContractAddress(string memory _contractName) internal view returns(address){
         bytes32 addressTag = keccak256(abi.encodePacked("contract__address", _contractName));
         address contractAddress = dataStorage.getAddressStorage(addressTag);
@@ -116,6 +137,40 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         return contractAddress;
     }
 
+    function getPoolState() public view returns(bool){
+        bytes32 statusTag = keccak256(abi.encodePacked("isPoolLive"));
+        return dataStorage.getBoolStorage(statusTag);
+    }
+
+    function getPoolMaxSize() public view returns(uint){
+        bytes32 poolMaxSizeTag = keccak256(abi.encodePacked("poolMaxSize"));
+        return dataStorage.getUintStorage(poolMaxSizeTag);        
+    }
+
+    function getRewardsInterval() public view returns(uint){
+        bytes32 daysRewTag = keccak256(abi.encodePacked("daysToRewards"));
+        return dataStorage.getUintStorage(daysRewTag);
+    }
+
+    function getRewardsInterest() public view returns(uint){
+        bytes32 rewardsIntTag = keccak256(abi.encodePacked("rewardsInterestPerPeriod"));
+        return dataStorage.getUintStorage(rewardsIntTag);
+    }
+
+    function getContributionLimit() public view returns(uint){
+        bytes32 contrLimitTag = keccak256(abi.encodePacked("contributionLimit"));
+        return dataStorage.getUintStorage(contrLimitTag);
+    }
+
+    function setMinContribution() public view returns(uint){
+        bytes32 minContrTag = keccak256(abi.encodePacked("minContribution"));
+        return dataStorage.getUintStorage(minContrTag);
+    }    
+
+    function getPoolFees() public view returns(uint){
+        bytes32 poolFeesTag = keccak256(abi.encodePacked("poolFees"));
+        return dataStorage.getUintStorage(poolFeesTag);
+    }
 
 
 

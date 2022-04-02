@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
+/// @title DataStorage, Data Storage Contract,
+/// @author liorabadi
+/// @notice Base and hub where all variables are stored and handled.
+
 import "./interfaces/DataStorageInterface.sol";
-
-
-/// @dev All trackers and state variables that handle the pool balances and information are stored in here.
 
 contract DataStorage is DataStorageInterface{
 
@@ -27,8 +28,8 @@ contract DataStorage is DataStorageInterface{
         currentGuardian = msg.sender;
     }
 
-    // The guardian needs to store the other Pool contracts within the Bool State tracker before setting the DataStorage contract as live.
-    // tx.origin is checked only in deployment.
+    /// @notice The guardian needs to store the other Pool contracts within the Bool State tracker before setting the DataStorage contract as live.
+    /// @notice tx.origin is checked only in deployment and pool implementation status. Not operative.
     modifier onlyByPoolContract {
             if(!storageLive){
                 require(tx.origin == currentGuardian || boolStorage[keccak256(abi.encodePacked("contract_exists", msg.sender))], "The contract address is invalid or the caller is not allowed.");
@@ -60,7 +61,7 @@ contract DataStorage is DataStorageInterface{
         emit GuardChange(oldGuardian, currentGuardian);
     } 
 
-    // Not reversible. Once it is live, stays thay way.
+    /// @notice Irreversible. Once the storage hub is live, stays that way.
     function setStorageLive() external {
         require(msg.sender == currentGuardian, "Only callable by current guardian.");
         storageLive = true;
@@ -87,8 +88,16 @@ contract DataStorage is DataStorageInterface{
     // ====== Storage Mappings Setters ======
     function setUintStorage(bytes32 _id, uint256 _value) external onlyByPoolContract{
         uintStorage[_id] = _value;
-    }    
+    }
+
+    function increaseUintStorage(bytes32 _id, uint256 _increment) external onlyByPoolContract{
+        uintStorage[_id] += _increment;
+    }
     
+    function decreaseUintStorage(bytes32 _id, uint256 _decrement) external onlyByPoolContract{
+        uintStorage[_id] -= _decrement;
+    }          
+
     function setBoolStorage(bytes32 _id, bool _value) external onlyByPoolContract{
         boolStorage[_id] = _value;
     }    
