@@ -124,7 +124,8 @@ describe("Staking Pool Network", function () {
       // PoolVault: Call a getter. Checking non reversal.
       expect(await pb.getPoolVaultAddress()).to.be.eq(contractsAddresses[3]);
       // rwETHToken : Call a getter. Checking non reversal.
-      expect(await pb.getRwETHTokenAddress()).to.be.eq(contractsAddresses[2]);              
+      expect(await pb.getRwETHTokenAddress()).to.be.eq(contractsAddresses[2]);    
+               
 
 
     });

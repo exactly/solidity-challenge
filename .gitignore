@@ -4,6 +4,8 @@ coverage
 coverage.json
 typechain
 
+OldContracts
+
 #Hardhat files
 cache
 artifacts
