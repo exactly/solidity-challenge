@@ -14,7 +14,7 @@ import "./interfaces/PoolClientInterface.sol";
 import "./interfaces/TokenBalancesInterface.sol";
 import "./interfaces/PoolVaultInterface.sol";
 
-abstract contract PoolClient is PoolBase, PoolClientInterface {
+contract PoolClient is PoolBase {
 
     event UserStaked(address indexed _staker, uint _ethAmount, uint _time);
     event RewardsInjected(uint _lastRewardTime, uint _amountInjected);
@@ -143,6 +143,13 @@ abstract contract PoolClient is PoolBase, PoolClientInterface {
         poolVault.withdrawEther(msg.sender, etherToUnstake);
         emit UserStaked(msg.sender, etherToUnstake, block.timestamp);
     }
+
+    function getPoolClientAddress() public view returns(address){
+        bytes32 addressTag = keccak256(abi.encodePacked("contract_address", "PoolClient"));
+        address contractAddress = dataStorage.getAddressStorage(addressTag);
+        return contractAddress;
+    }    
+    
 
 
 

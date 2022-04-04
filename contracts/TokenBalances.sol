@@ -7,7 +7,7 @@ pragma solidity 0.8.9;
 
 import "./PoolBase.sol";
 
-abstract contract TokenBalances is PoolBase {
+contract TokenBalances is PoolBase {
 
 
     constructor (DataStorageInterface _dataStorageAddress) PoolBase(_dataStorageAddress) {

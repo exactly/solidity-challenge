@@ -1,35 +1,58 @@
 require("@nomiclabs/hardhat-waffle");
-require('dotenv').config();
+require("hardhat-gas-reporter");
+require("dotenv").config();
 require('@openzeppelin/hardhat-upgrades');
 require("@nomiclabs/hardhat-etherscan");
+require('@nomiclabs/hardhat-ethers');
 
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
+// // This is a sample Hardhat task. To learn how to create your own go to
+// // https://hardhat.org/guides/create-task.html
+// task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+//   const accounts = await hre.ethers.getSigners();
 
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+//   for (const account of accounts) {
+//     console.log(account.address);
+//   }
+// });
 
 
 module.exports = {
-  solidity: "0.8.9",
-  // defaultNetwork: "hardhat",
-
-  networks: {
-
-    hardhat: {
-      chainId: 1337
+  solidity: {
+    version: "0.8.9",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 150,
+      },
     },
-    
-     rinkeby: {
-      url: process.env.RINKEBY_ALCHEMY_URL,
-      accounts: [process.env.RINKEBY_PRIVATE_KEY]
-     },
-
+  },
+  defaultNetwork: "hardhat",
+  networks: {
+    hardhat: {
+      blockGasLimit: 3000000      
+    },
+    rinkeby: {
+      url: process.env.NETWORK_RINKEBY_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    mainnet: {
+      url: process.env.NETWORK_MAINNET_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+  },
+  gasReporter: {
+    enabled: true,
+    currency: "USD",
+    token: "ETH",
+    coinmarketcap: process.env.GAS_REPORTER_COIN_MARKET_CAP_API_KEY !== undefined,
+    gasPriceApi: process.env.ETHERSCAN_GAS_API, 
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
-  }
-
+    apiKey: process.env.ETHERSCAN_API_KEY,
+  },
 };
+
+// To verify run:
+// npx hardhat verify --constructor-args config/contractArguments.js CONTRACT_ADDRESS --network rinkeby

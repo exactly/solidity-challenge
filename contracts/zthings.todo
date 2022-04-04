@@ -1,11 +1,7 @@
-PoolManagement Non Used Implementations:
-    ☐ Rewards Calculation
-    ☐ Computation of earned fees
+Variables of interest:
+    ☐ totalSupply_Ether
+    ☐ totalSupply_rewardEther
+    ☐ ether_staked_by_user
+    ☐ total_ether_staked
 
-PoolBase:
-    Functions to Implement:
-        ☐ injectRewards (missing: pool balance, Ether and rwEther on the network).
-
-InvestingTokens:
-    ☐ modifiers of deposit and withdrawal compliances
 

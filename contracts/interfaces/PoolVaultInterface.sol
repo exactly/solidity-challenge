@@ -7,5 +7,7 @@ interface PoolVaultInterface {
     function storeEther() external payable;
     function processRewards() external payable;
     function withdrawEther(address _to, uint _ethAmount) external;
+    function getPoolVaultAddress() external view returns(address);
+            
 
 }

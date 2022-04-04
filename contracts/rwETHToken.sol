@@ -10,8 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./PoolBase.sol";
 import "./interfaces/TokenBalancesInterface.sol";
 
-
-abstract contract rwETHToken is PoolBase, ERC20, TokenBalancesInterface {
+contract rwETHToken is PoolBase, ERC20 {
 
     event TokensMinted(address indexed _to, uint _rwEthAmount, uint _ethAmount);
     event TokensBurned(address indexed _from, uint _rwEthAmount);
@@ -86,5 +85,11 @@ abstract contract rwETHToken is PoolBase, ERC20, TokenBalancesInterface {
         _burn(msg.sender, _rwEthAmount);
         emit TokensBurned(msg.sender, _rwEthAmount);
     }
+    function getRwETHTokenAddress() public view returns(address){
+        bytes32 addressTag = keccak256(abi.encodePacked("contract_address", "rwETHToken"));
+        address contractAddress = dataStorage.getAddressStorage(addressTag);
+        return contractAddress;
+    }    
+            
 
 }

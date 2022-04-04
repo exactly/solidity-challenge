@@ -10,7 +10,7 @@ pragma solidity 0.8.9;
 import "./PoolBase.sol";
 import "./interfaces/rwETHTokenInterface.sol";
 
-abstract contract PoolVault is PoolBase {
+contract PoolVault is PoolBase {
 
     constructor(DataStorageInterface _dataStorageAddress) PoolBase(_dataStorageAddress) {
         _setPoolVaultAddress();
@@ -41,8 +41,11 @@ abstract contract PoolVault is PoolBase {
     
     function withdrawEther(address _to, uint _ethAmount) external onlyByPoolContract nonReentrant() {
         bytes32 etherVaultedTag = keccak256(abi.encodePacked("total_ether_staked"));
+        bytes32 ethBalTag = keccak256(abi.encodePacked("totalSupply_Ether"));
         require(dataStorage.getUintStorage(etherVaultedTag) - _ethAmount >= 0 , "Lacking of ether to perform this action.");
+        
         dataStorage.decreaseUintStorage(etherVaultedTag, _ethAmount);   
+        dataStorage.decreaseUintStorage(ethBalTag, _ethAmount);   
             
         (bool success, ) = payable(_to).call{value: _ethAmount}("");
         require(success);
@@ -52,6 +55,13 @@ abstract contract PoolVault is PoolBase {
         bytes32 etherVaultedTag = keccak256(abi.encodePacked("total_ether_staked"));
         dataStorage.increaseUintStorage(etherVaultedTag, msg.value);
     }
+
+    function getPoolVaultAddress() public view returns(address){
+        bytes32 addressTag = keccak256(abi.encodePacked("contract_address", "PoolVault"));
+        address contractAddress = dataStorage.getAddressStorage(addressTag);
+        return contractAddress;
+    }    
+        
 
  
 }

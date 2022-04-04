@@ -26,6 +26,7 @@ contract DataStorage is DataStorageInterface{
 
     constructor() {
         currentGuardian = msg.sender;
+        _setDataStorageAddress();
     }
 
     /// @notice The guardian needs to store the other Pool contracts within the Bool State tracker before setting the DataStorage contract as live.
@@ -34,12 +35,22 @@ contract DataStorage is DataStorageInterface{
             if(!storageLive){
                 require(tx.origin == currentGuardian || boolStorage[keccak256(abi.encodePacked("contract_exists", msg.sender))], "The contract address is invalid or the caller is not allowed.");
             } else {
-                require(boolStorage[keccak256(abi.encodePacked("contract_exists", msg.sender))], "The contract address is invalid.");
+                require(boolStorage[keccak256(abi.encodePacked("contract_exists", msg.sender))], "The contract address or sender is invalid.");
             }
         _;
     }
 
     // ====== Storage Contract Control ======
+    /// @dev Store this contract address and existance on the main storage.
+    /// @notice Called while deploying the contract. 
+    function _setDataStorageAddress() private {
+        bytes32 dsBoolTag = keccak256(abi.encodePacked("contract_exists", address(this)));
+        bytes32 dsAddressTag = keccak256(abi.encodePacked("contract_address", "DataStorage"));
+
+        boolStorage[dsBoolTag] = true;
+        addressStorage[dsAddressTag] = address(this);
+    }
+
     function getStorageStatus() external view returns(bool){
         return storageLive;
     }    
@@ -80,11 +91,7 @@ contract DataStorage is DataStorageInterface{
         return addressStorage[_id];
     }   
     
-    function getBytes32Storage(bytes32 _id) external view returns(bytes32){
-        return bytes32Storage[_id];
-    }
-
-    
+   
     // ====== Storage Mappings Setters ======
     function setUintStorage(bytes32 _id, uint256 _value) external onlyByPoolContract{
         uintStorage[_id] = _value;
@@ -106,10 +113,6 @@ contract DataStorage is DataStorageInterface{
         addressStorage[_id] = _value;
     } 
 
-    function setBytes32Storage(bytes32 _id, bytes32 _value) external onlyByPoolContract{
-        bytes32Storage[_id] = _value;
-    }
-
 
     // ====== Storage Mappings Deleters ======
     function deleteUintStorage(bytes32 _id) external onlyByPoolContract{
@@ -124,8 +127,5 @@ contract DataStorage is DataStorageInterface{
         delete addressStorage[_id];
     } 
 
-    function deleteBytes32Storage(bytes32 _id) external onlyByPoolContract{
-        delete bytes32Storage[_id];
-    }
     
 }

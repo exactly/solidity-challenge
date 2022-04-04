@@ -14,13 +14,11 @@ interface DataStorageInterface {
     function getUintStorage(bytes32 _id) external view returns(uint256);
     function getBoolStorage(bytes32 _id) external view returns(bool);
     function getAddressStorage(bytes32 _id) external view returns(address);
-    function getBytes32Storage(bytes32 _id) external view returns(bytes32);
-    
+
     // ====== Storage Mappings Setters ======
     function setUintStorage(bytes32 _id, uint256 _value) external;
     function setBoolStorage(bytes32 _id, bool _value) external;
     function setAddressStorage(bytes32 _id, address _value) external; 
-    function setBytes32Storage(bytes32 _id, bytes32 _value) external;
     function increaseUintStorage(bytes32 _id, uint256 _increment) external;
     function decreaseUintStorage(bytes32 _id, uint256 _decrement) external;        
 
@@ -28,6 +26,5 @@ interface DataStorageInterface {
     function deleteUintStorage(bytes32 _id) external;
     function deleteBoolStorage(bytes32 _id) external;
     function deleteAddressStorage(bytes32 _id) external;
-    function deleteBytes32Storage(bytes32 _id) external;
-    
+
 }
