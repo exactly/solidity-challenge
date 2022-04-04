@@ -29,7 +29,7 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      blockGasLimit: 3000000      
+      blockGasLimit: 30000000      // (30 MM) The gas limit per block on mainnet by Apr. 2022. 
     },
     rinkeby: {
       url: process.env.NETWORK_RINKEBY_URL || "",

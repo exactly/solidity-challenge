@@ -36,5 +36,11 @@ contract TokenBalances is PoolBase {
         bytes32 currentPoolSizeTag = keccak256(abi.encodePacked("total_ether_staked"));
         return dataStorage.getUintStorage(currentPoolSizeTag);
     }    
+
+    function getTokenBalancesAddress() public view returns(address){
+        bytes32 addressTag = keccak256(abi.encodePacked("contract_address", "TokenBalances"));
+        address contractAddress = dataStorage.getAddressStorage(addressTag);
+        return contractAddress;
+    }        
 }
 

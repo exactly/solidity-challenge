@@ -89,7 +89,12 @@ contract DataStorage is DataStorageInterface{
 
     function getAddressStorage(bytes32 _id) external view returns(address){
         return addressStorage[_id];
-    }   
+    }
+
+    function getDataStorageAddress() external view returns(address){
+        bytes32 dsAddressTag = keccak256(abi.encodePacked("contract_address", "DataStorage"));
+        return addressStorage[dsAddressTag];
+    }          
     
    
     // ====== Storage Mappings Setters ======

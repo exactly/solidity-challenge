@@ -57,9 +57,9 @@ describe("Staking Pool Network", function () {
     pb = await PB.deploy(ds.address);
     await pb.deployed();
 
-    contracts = [ds, tb, rweth, pv, pc, pb];
+    contracts = [ds, pb, tb, rweth, pv, pc];
     contractsAddresses = (contracts.map((item) => {return item.address;}));
-    contractNames = ["DataStorage", "TokenBalances", "rwETHToken", "PoolVault", "PoolClient", "PoolBase"];
+    contractNames = ["DataStorage", "PoolBase", "TokenBalances", "rwETHToken", "PoolVault", "PoolClient"];
 
     // console.log("DataStorage Deployed to: ", ds.address);
     // console.log("PoolBase Deployed to: ", pb.address);
@@ -115,19 +115,20 @@ describe("Staking Pool Network", function () {
         poolMaxSize = ethers.utils.parseEther("1000");
         await pb.connect(admin).setPoolMaxSize(poolMaxSize);
         await pb.connect(admin).setPoolLive(true);
-        expect(await pb.getPoolBaseAddress()).to.be.eq(contractsAddresses[5]);
+        expect(await pb.getPoolBaseAddress()).to.be.eq(contractsAddresses[1]);
         expect(await pb.getPoolState()).to.be.true;
         expect(await pb.getPoolMaxSize()).to.be.eq(poolMaxSize);
       // PoolClient: Call a getter. Checking non reversal.
         expect(await pc.connect(admin).getRewardsToInject()).to.be.eq(0);
-        expect(await pb.getPoolClientAddress()).to.be.eq(contractsAddresses[4]);
+        expect(await pc.getPoolClientAddress()).to.be.eq(contractsAddresses[5]);
       // PoolVault: Call a getter. Checking non reversal.
-      expect(await pb.getPoolVaultAddress()).to.be.eq(contractsAddresses[3]);
+        expect(await pv.poolEtherSize()).to.be.eq(0);  
+        expect(await pv.getPoolVaultAddress()).to.be.eq(contractsAddresses[4]);
       // rwETHToken : Call a getter. Checking non reversal.
-      expect(await pb.getRwETHTokenAddress()).to.be.eq(contractsAddresses[2]);    
-               
-
-
+        expect(await rweth.getRwETHTokenAddress()).to.be.eq(contractsAddresses[3]);    
+      // TokenBalances : Call a getter. Checking non reversal.
+        expect(await tb.getTokenBalancesAddress()).to.be.eq(contractsAddresses[2]);  
+        expect(await tb.getTotalEtherStaked()).to.be.eq(0);      
     });
 
   });

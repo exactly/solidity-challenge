@@ -14,6 +14,7 @@ interface DataStorageInterface {
     function getUintStorage(bytes32 _id) external view returns(uint256);
     function getBoolStorage(bytes32 _id) external view returns(bool);
     function getAddressStorage(bytes32 _id) external view returns(address);
+    function getDataStorageAddress() external view returns(address);
 
     // ====== Storage Mappings Setters ======
     function setUintStorage(bytes32 _id, uint256 _value) external;

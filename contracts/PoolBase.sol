@@ -136,7 +136,7 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         return contractAddress;
     }
 
-    function poolBaseAddress() public view returns(address){
+    function getPoolBaseAddress() public view returns(address){
         bytes32 addressTag = keccak256(abi.encodePacked("contract_address", "PoolBase"));
         address contractAddress = dataStorage.getAddressStorage(addressTag);
         return contractAddress;
