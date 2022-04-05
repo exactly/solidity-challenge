@@ -12,7 +12,6 @@ interface PoolBaseInterface {
     function setRewardsInterest(uint _rewardsInterest) external;
     function setContributionLimit(uint _newContrLimit) external;
     function setMinContribution(uint _newMinContr) external;
-    function setPoolFees(uint _poolFees) external;
 
     function poolBaseAddress() external view returns(address);
     function getPoolState() external view returns(bool);
@@ -21,5 +20,5 @@ interface PoolBaseInterface {
     function getRewardsInterest() external view returns(uint);
     function getContributionLimit() external view returns(uint);
     function getMinContribution() external view returns(uint);
-    function getPoolFees() external view returns(uint);
+
 }

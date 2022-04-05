@@ -30,7 +30,6 @@ contract PoolClient is PoolBase {
         bytes32 daysRewTag = keccak256(abi.encodePacked("daysToRewards"));
         bytes32 rewardsIntTag = keccak256(abi.encodePacked("rewardsInterestPerPeriod"));
         bytes32 contrLimitTag = keccak256(abi.encodePacked("contributionLimit"));
-        bytes32 poolFeesSetTag = keccak256(abi.encodePacked("poolFeesSet"));
         bytes32 minContrTag = keccak256(abi.encodePacked("minContribution"));
         bytes32 poolMaxSizeTag = keccak256(abi.encodePacked("poolMaxSize"));
         bytes32 stakedByUserTag = keccak256(abi.encodePacked("ether_staked_by_user", msg.sender));
@@ -39,7 +38,6 @@ contract PoolClient is PoolBase {
         require(dataStorage.getUintStorage(daysRewTag) != 0, "The team needs to set a reward interval.");
         require(dataStorage.getUintStorage(rewardsIntTag) != 0 , "The team needs to set a reward ratio.");
         require(dataStorage.getUintStorage(contrLimitTag) != 0, "The team needs to set a contribution limit.");
-        require(dataStorage.getBoolStorage(poolFeesSetTag), "The team needs to set the pool fees.");
         require(newBalance <= dataStorage.getUintStorage(contrLimitTag), "Max. current contribution limit exceeded.");
         require(dataStorage.getUintStorage(minContrTag) <= msg.value, "Value to deposit needs to be higher than the current minimum contribution limit.");
         require(poolVault.poolEtherSize() + msg.value <= dataStorage.getUintStorage(poolMaxSizeTag), "Max. Pool size overflow with that amount of deposit.");
@@ -50,8 +48,6 @@ contract PoolClient is PoolBase {
     modifier withdrawCompliance(uint _rwEtherWithdrawal) {
         PoolVaultInterface poolVault = PoolVaultInterface(getContractAddress("PoolVault"));
         rwETHTokenInterface rwEthToken = rwETHTokenInterface(getContractAddress("rwETHToken"));
-        TokenBalancesInterface tokenBalances = TokenBalancesInterface(getContractAddress("TokenBalances"));
-
         bytes32 statusTag = keccak256(abi.encodePacked("isPoolLive"));
 
         require(rwEthToken.balanceOf(msg.sender) >= _rwEtherWithdrawal, "You don't have that amount of tokens in your account.");
@@ -65,8 +61,8 @@ contract PoolClient is PoolBase {
 
         require(!dataStorage.getBoolStorage(statusTag), "The pool is currently live.");
       _;
-    }   
-    
+    }
+   
     /// @dev Store this contract address and existance on the main storage.
     /// @notice Called while deploying the contract. 
     function _setPoolClientAddress() private {
@@ -95,13 +91,16 @@ contract PoolClient is PoolBase {
         PoolVaultInterface poolVault = PoolVaultInterface(getContractAddress("PoolVault"));
         poolVault.storeEther{value: msg.value}(msg.sender);
     }
+  
 
     /// @dev Helps the team calculate the rewards. Also, assigns the amount to inject into a variable.
-    function calculateRewards() external onlyRole(POOL_MANAGER) {
+    function calculateRewards() public onlyRole(POOL_MANAGER) injectionComliance() {
+        TokenBalancesInterface poolTokenBalances = TokenBalancesInterface(getContractAddress("TokenBalances"));
+        
         bytes32 rewardsToInjectTag = keccak256(abi.encodePacked("rewardsToInject"));
-        bytes32 currentEthSupplyTag = keccak256(abi.encodePacked("totalSupply_Ether"));
+               
         uint rewardsInterest = getRewardsInterest();
-        uint rewardsToInject = dataStorage.getUintStorage(currentEthSupplyTag) * rewardsInterest / (10**6);
+        uint rewardsToInject = poolTokenBalances.getTotalEtherStaked() * rewardsInterest / (10**6);
         dataStorage.setUintStorage(rewardsToInjectTag, rewardsToInject);
     }
 
@@ -110,12 +109,12 @@ contract PoolClient is PoolBase {
         bytes32 rewardsToInjectTag = keccak256(abi.encodePacked("rewardsToInject"));
         return dataStorage.getUintStorage(rewardsToInjectTag);
     }
-
+    
     /// @dev This function logic prevents the team to inject a wrong amount of ether as rewards.
     /// @notice With this function, both the team and the users will have the insuarance that the right amount will be injected.
     /// @notice the require reverts the process if a wrong amount is willed to be injected.
     /// @notice this function does not updates the poolEther size, it just updates the total amount of ether on the contract network.
-    function rewardsInjector() public onlyRole(POOL_MANAGER) payable {
+    function rewardsInjector() public payable onlyRole(POOL_MANAGER) injectionComliance() {
         require(msg.value == getRewardsToInject(), "Invalid ether interest injected.");
         PoolVaultInterface poolVault = PoolVaultInterface(getContractAddress("PoolVault"));
 

@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract PoolBase is AccessControl, ReentrancyGuard{
 
-    bytes32 public constant POOL_MANAGER = keccak256("POOL_MANAGER"); // 
+    bytes32 public constant POOL_MANAGER = keccak256("POOL_MANAGER");
 
     // Events
     event NewManagerAdded(address indexed _newManager);
@@ -114,21 +114,6 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     }
     
 
-    /// @dev Set the pool fees fraction that the pool charges for each deposit.
-    /// @param _poolFees within the storage has 6 decimals.
-    /// @notice E.G. If 0.001235 fees fraction are desired, 0.001235 * (10**6) = 1235.
-    /// @notice Also it sets the state variable "poolFeesSet" as true.
-    /// @notice If the poolFees are higher than the Interest Per period, it means tha the user will have to 
-    /// @notice wait more than one period to recover that fee. Management & Operation choices...
-    function setPoolFees(uint _poolFees) public onlyRole(POOL_MANAGER) {
-        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
-        bytes32 poolFeesTag = keccak256(abi.encodePacked("poolFees"));
-        bytes32 poolFeesSetTag = keccak256(abi.encodePacked("poolFeesSet"));
-        
-        dataStorage.setUintStorage(poolFeesTag, _poolFees);
-        dataStorage.setBoolStorage(poolFeesSetTag, true);
-    } 
-
     // ====== Pool Data Getters  ======
     /// @dev Getters for each pool variable.
 
@@ -174,11 +159,6 @@ contract PoolBase is AccessControl, ReentrancyGuard{
         bytes32 minContrTag = keccak256(abi.encodePacked("minContribution"));
         return dataStorage.getUintStorage(minContrTag);
     }    
-
-    function getPoolFees() public view returns(uint){
-        bytes32 poolFeesTag = keccak256(abi.encodePacked("poolFees"));
-        return dataStorage.getUintStorage(poolFeesTag);
-    }
 
 
 
