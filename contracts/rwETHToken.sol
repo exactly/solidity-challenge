@@ -85,6 +85,7 @@ contract rwETHToken is PoolBase, ERC20 {
         _burn(msg.sender, _rwEthAmount);
         emit TokensBurned(msg.sender, _rwEthAmount);
     }
+    
     function getRwETHTokenAddress() public view returns(address){
         bytes32 addressTag = keccak256(abi.encodePacked("contract_address", "rwETHToken"));
         address contractAddress = dataStorage.getAddressStorage(addressTag);

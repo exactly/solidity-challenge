@@ -105,7 +105,10 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     /// @dev Set the min. contribution allowed for each user.
     /// @param _newMinContr is a WEI value.
     function setMinContribution(uint _newMinContr) public onlyRole(POOL_MANAGER){
+        bytes32 contrLimitTag = keccak256(abi.encodePacked("contributionLimit"));
         require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
+        require(dataStorage.getUintStorage(contrLimitTag) > _newMinContr, "The min. contr. limit needs to be smaller than the max. limit.");
+        
         bytes32 minContrTag = keccak256(abi.encodePacked("minContribution"));
         dataStorage.setUintStorage(minContrTag, _newMinContr);
     }
@@ -132,7 +135,7 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     function getContractAddress(string memory _contractName) internal view returns(address){
         bytes32 addressTag = keccak256(abi.encodePacked("contract_address", _contractName));
         address contractAddress = dataStorage.getAddressStorage(addressTag);
-        require(contractAddress == address(0x0), "Contract address not found.");
+        require(contractAddress != address(0x0), "Contract address not found.");
         return contractAddress;
     }
 

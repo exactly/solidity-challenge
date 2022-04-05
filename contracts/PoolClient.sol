@@ -33,15 +33,17 @@ contract PoolClient is PoolBase {
         bytes32 poolFeesSetTag = keccak256(abi.encodePacked("poolFeesSet"));
         bytes32 minContrTag = keccak256(abi.encodePacked("minContribution"));
         bytes32 poolMaxSizeTag = keccak256(abi.encodePacked("poolMaxSize"));
-
-        require(dataStorage.getBoolStorage(statusTag), "The pool is currently paused");
+        bytes32 stakedByUserTag = keccak256(abi.encodePacked("ether_staked_by_user", msg.sender));
+        uint newBalance  = dataStorage.getUintStorage(stakedByUserTag) + msg.value;
+        
         require(dataStorage.getUintStorage(daysRewTag) != 0, "The team needs to set a reward interval.");
         require(dataStorage.getUintStorage(rewardsIntTag) != 0 , "The team needs to set a reward ratio.");
         require(dataStorage.getUintStorage(contrLimitTag) != 0, "The team needs to set a contribution limit.");
         require(dataStorage.getBoolStorage(poolFeesSetTag), "The team needs to set the pool fees.");
-        require(msg.value <= dataStorage.getUintStorage(contrLimitTag), "Max. current contribution limit exceeded.");
+        require(newBalance <= dataStorage.getUintStorage(contrLimitTag), "Max. current contribution limit exceeded.");
         require(dataStorage.getUintStorage(minContrTag) <= msg.value, "Value to deposit needs to be higher than the current minimum contribution limit.");
         require(poolVault.poolEtherSize() + msg.value <= dataStorage.getUintStorage(poolMaxSizeTag), "Max. Pool size overflow with that amount of deposit.");
+        
         _;
     }
 
@@ -52,9 +54,9 @@ contract PoolClient is PoolBase {
 
         bytes32 statusTag = keccak256(abi.encodePacked("isPoolLive"));
 
-        require(dataStorage.getBoolStorage(statusTag), "The pool is currently paused");
         require(rwEthToken.balanceOf(msg.sender) >= _rwEtherWithdrawal, "You don't have that amount of tokens in your account.");
         require(poolVault.poolEtherSize() - rwEthToken.calcEthValue(_rwEtherWithdrawal) >= 0, "Pool size cannot be smaller than zero.");
+        require(dataStorage.getBoolStorage(statusTag), "The pool is currently paused");
         _;
     }
 
@@ -91,7 +93,7 @@ contract PoolClient is PoolBase {
     /// @dev Transfers the staked ether to the vault.
     function _depositToVault() private {
         PoolVaultInterface poolVault = PoolVaultInterface(getContractAddress("PoolVault"));
-        poolVault.storeEther{value: msg.value}();
+        poolVault.storeEther{value: msg.value}(msg.sender);
     }
 
     /// @dev Helps the team calculate the rewards. Also, assigns the amount to inject into a variable.

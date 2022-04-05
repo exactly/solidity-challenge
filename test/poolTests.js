@@ -215,6 +215,94 @@ describe("Staking Pool Network", function () {
 
 
   });
+  describe("rwETHToken Contract", function () {
+    let arbitratyDeposit;
+    
+      it("Deposit should revert if the depositCompliance is not satisfied", async function () {
+        /// @dev While testing, the Paused Pool Status has been moved to the end of the require set.
+        arbitratyDeposit = ethers.utils.parseEther("0.5");
+
+        rewardsInterval = ethers.BigNumber.from("7"); // (days)
+        rewardsInterest = ethers.BigNumber.from("1000");
+        contrLimit = ethers.utils.parseEther("0.4");
+        minContr = ethers.utils.parseEther("0.6");
+        poolFees = ethers.BigNumber.from("500");
+        poolMaxSize = ethers.utils.parseEther("0.4");
+
+        // Reversals:
+        // Days Interval
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("The team needs to set a reward interval.");
+        await pb.connect(admin).setRewardsInterval(rewardsInterval);
+
+        // Rewards Ratio
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("The team needs to set a reward ratio.");
+        await pb.connect(admin).setRewardsInterest(rewardsInterest);
+
+        // Contribution Limit Set
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("The team needs to set a contribution limit.");
+        await pb.connect(admin).setContributionLimit(contrLimit);
+
+        // Pool Fees
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("The team needs to set the pool fees.");
+        await pb.connect(admin).setPoolFees(poolFees);
+
+        // Contribution Limit Excess
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("Max. current contribution limit exceeded.");
+        let newLimit = ethers.utils.parseEther("10");
+        await pb.connect(admin).setContributionLimit(newLimit);
+
+        // Min Contr. Limit
+        await pb.connect(admin).setMinContribution(minContr);
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("Value to deposit needs to be higher than the current minimum contribution limit.");
+        let newMin = ethers.utils.parseEther("0.1");
+        await pb.connect(admin).setMinContribution(newMin);
+
+        // Max. Pool Size
+        await pb.connect(admin).setPoolMaxSize(poolMaxSize);
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("Max. Pool size overflow with that amount of deposit.");
+        let newPoolSize = ethers.utils.parseEther("100");
+        await pb.connect(admin).setPoolMaxSize(newPoolSize);  
+
+        // Pause
+        expect(pc.connect(userA).deposit({value: arbitratyDeposit})).to.be.revertedWith("The pool is currently paused");
+        await pb.connect(admin).setPoolLive(true);  
+        
+        // Check that the ETH balance deducts from UserA (just checking that the call goes through the modifier).
+        // This estimation does not consider the gas spent.
+        let userAInitialBalance = ethers.utils.formatEther(await provider.getBalance(walletAddresses[1]));
+        userAInitialBalance = Math.round(userAInitialBalance * 1e3) / 1e3;
+
+        let formatedDeposit = ethers.utils.formatEther(arbitratyDeposit);
+        formatedDeposit = Math.round(formatedDeposit * 1e3) / 1e3;
+
+        await pc.connect(userA).deposit({value: arbitratyDeposit});
+
+        let userAFinalBalance = ethers.utils.formatEther(await provider.getBalance(walletAddresses[1]));
+        userAFinalBalance = Math.round(userAFinalBalance * 1e3) / 1e3;
+
+        expect(userAInitialBalance-formatedDeposit).to.be.eq(userAFinalBalance);
+      });
+      
+    // describe("Contract Operations", function () {
+    //   beforeEach(async() => {
+    //     // Set base pool variables to test other behaviors.
+    //     poolMaxSize = ethers.utils.parseEther("1000");
+    //     rewardsInterval = ethers.BigNumber.from("7"); // (days)
+    //     rewardsInterest = ethers.BigNumber.from("1000");
+    //     contrLimit = ethers.utils.parseEther("5");
+    //     minContr = ethers.utils.parseEther("0.1");
+    //     poolFees = ethers.BigNumber.from("500");
+
+    //     await pb.connect(admin).setPoolMaxSize(poolMaxSize);
+    //     await pb.connect(admin).setRewardsInterval(rewardsInterval);
+    //     await pb.connect(admin).setRewardsInterest(rewardsInterest);
+    //     await pb.connect(admin).setContributionLimit(contrLimit);
+    //     await pb.connect(admin).setMinContribution(minContr);
+    //     await pb.connect(admin).setPoolFees(poolFees);
+    //   });
+    // });
+
+  });
 
 
 

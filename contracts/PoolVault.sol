@@ -34,19 +34,25 @@ contract PoolVault is PoolBase {
         return dataStorage.getUintStorage(etherVaultedTag);
     }
 
-    function storeEther() external payable onlyByPoolContract {
+    function storeEther(address _from) external payable onlyByPoolContract {
         bytes32 etherVaultedTag = keccak256(abi.encodePacked("total_ether_staked"));
+        bytes32 stakedByUserTag = keccak256(abi.encodePacked("ether_staked_by_user", _from));
         dataStorage.increaseUintStorage(etherVaultedTag, msg.value);
+        dataStorage.increaseUintStorage(stakedByUserTag, msg.value);
     }
     
     function withdrawEther(address _to, uint _ethAmount) external onlyByPoolContract nonReentrant() {
         bytes32 etherVaultedTag = keccak256(abi.encodePacked("total_ether_staked"));
         bytes32 ethBalTag = keccak256(abi.encodePacked("totalSupply_Ether"));
-        require(dataStorage.getUintStorage(etherVaultedTag) - _ethAmount >= 0 , "Lacking of ether to perform this action.");
-        
+        bytes32 stakedByUserTag = keccak256(abi.encodePacked("ether_staked_by_user", _to));
+
+        require(dataStorage.getUintStorage(etherVaultedTag) - _ethAmount >= 0 , "Pool lacking of ether to perform this action.");
+        require(dataStorage.getUintStorage(stakedByUserTag) - _ethAmount >= 0 , "User lacking of ether to perform this action.");
+
         dataStorage.decreaseUintStorage(etherVaultedTag, _ethAmount);   
         dataStorage.decreaseUintStorage(ethBalTag, _ethAmount);   
-            
+        dataStorage.decreaseUintStorage(stakedByUserTag, _ethAmount);
+
         (bool success, ) = payable(_to).call{value: _ethAmount}("");
         require(success);
     }
