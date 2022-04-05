@@ -234,7 +234,6 @@ describe("Staking Pool Network", function () {
       });
     
       it("Deposit should revert if the depositCompliance is not satisfied", async function () {
-        /// @dev While testing, the Paused Pool Status has been moved to the end of the require set.
         arbitratyDeposit = ethers.utils.parseEther("0.5");
 
         rewardsInterval = ethers.BigNumber.from("7"); // (days)
@@ -295,7 +294,7 @@ describe("Staking Pool Network", function () {
         expect((userAInitialBalance-formatedDeposit)).to.be.eq(userAFinalBalance);
       });
 
-      it("Should mint 1:1 rwETH on deposit", async function () {
+      it("Should mint 1:1 rwETH on first deposit", async function () {
         await pb.connect(admin).setPoolMaxSize(poolMaxSize);
         await pb.connect(admin).setRewardsInterval(rewardsInterval);
         await pb.connect(admin).setRewardsInterest(rewardsInterest);
@@ -405,7 +404,6 @@ describe("Staking Pool Network", function () {
         await pc.connect(walletAccounts[2]).deposit({value: arbitratyDeposit});
         // expect(await rweth.balanceOf(walletAddresses[2])).to.be.eq(arbitratyDeposit) // This wont work because there is no 1:1 ex rate anymore,
         let rwCalculated  = await rweth.calcRwEthValue(arbitratyDeposit);
-        //console.log(ethers.utils.formatEther(rwCalculated), ethers.utils.formatEther(await rweth.balanceOf(walletAddresses[2])));
         expect(await rweth.balanceOf(walletAddresses[2])).to.be.eq(rwCalculated);
       });
 
@@ -442,48 +440,47 @@ describe("Staking Pool Network", function () {
         // UserB withdraws ether and their interests (due to repricing).
         let hugeAmount = ethers.utils.parseEther("100");
         expect(pc.connect(walletAccounts[2]).withdraw(hugeAmount)).to.be.revertedWith("You don't have that amount of tokens on your account.");
-       
-        // initial states
-        let initialBBalance = await rweth.balanceOf(walletAddresses[2]);
-        let totalRwSupply0 = await rweth.totalSupply();
-        let contractRwSupplyControl0 = await tb.getTotalrwEthSupply();
 
-        await pc.connect(walletAccounts[2]).withdraw(initialBBalance);
-
-        // final states
-        let finalBBalance = await rweth.balanceOf(walletAddresses[2]);
-        let totalRwSupply1 = await rweth.totalSupply();
-        let contractRwSupplyControl1 = await tb.getTotalrwEthSupply();
-
-        expect(finalBBalance).to.be.eq(0);
-        expect(totalRwSupply1.sub(totalRwSupply0)).to.be.eq(initialBBalance);
-        expect(contractRwSupplyControl1.sub(contractRwSupplyControl0)).to.be.eq(initialBBalance);
+        let initialBalance, totalRwSupply0, contractRwSupplyControl0, userEtherBal0;
+        let etherWithdawal, calcFinalEthBal;
+        let finalBalance, totalRwSupply1, contractRwSupplyControl1, userEtherBal1;
         
-    
-      
+        // Process withdawals of every user that invested.
+        for (let index = 1; index <= 2; index++) {
+          // initial states
+          initialBalance = await rweth.balanceOf(walletAddresses[index]);
+          totalRwSupply0 = await rweth.totalSupply();
+          contractRwSupplyControl0 = await tb.getTotalrwEthSupply();
+          userEtherBal0 = await provider.getBalance(walletAddresses[index]);
+
+          // Calculate the amount of ether that the UserB will get back. Gas fees are rounded.
+          etherWithdawal = await rweth.calcEthValue(initialBalance);
+          calcFinalEthBal = ethers.utils.formatEther((userEtherBal0.add(etherWithdawal)));
+          calcFinalEthBal = Math.round(calcFinalEthBal);
+
+          expect(pc.connect(walletAccounts[index]).withdraw(initialBalance)).to.be.revertedWith("Reverted: Client lacks allowance to perform this action.");
+          // User provides Allowance (e.g via Dapp) to PoolClient to transfer his tokens.
+          await rweth.connect(walletAccounts[index]).approve(contractsAddresses[5], initialBalance);
+          await pc.connect(walletAccounts[index]).withdraw(initialBalance);
+          
+          // final states
+          finalBalance = await rweth.balanceOf(walletAddresses[index]);
+          totalRwSupply1 = await rweth.totalSupply();
+          contractRwSupplyControl1 = await tb.getTotalrwEthSupply();
+          userEtherBal1 = ethers.utils.formatEther(await provider.getBalance(walletAddresses[index]));
+          userEtherBal1 = Math.round(userEtherBal1);
+
+          // Try to withdraw again (Checking reversals if the user decides to call the function again...)
+          await rweth.connect(walletAccounts[index]).approve(contractsAddresses[5], initialBalance); // Making a token-amount reversal instead of an allowance one.
+          expect(pc.connect(walletAccounts[index]).withdraw(initialBalance)).to.be.revertedWith("You don't have that amount of tokens on your account.");
+          
+          expect(finalBalance).to.be.eq(0);
+          expect(totalRwSupply0.sub(totalRwSupply1)).to.be.eq(initialBalance);
+          expect(contractRwSupplyControl0.sub(contractRwSupplyControl1)).to.be.eq(initialBalance);
+          expect(userEtherBal1).to.be.eq(calcFinalEthBal);
+        }
+     
       });
-
-
-
-
-    // describe("Contract Operations", function () {
-    //   beforeEach(async() => {
-    //     // Set base pool variables to test other behaviors.
-    //     poolMaxSize = ethers.utils.parseEther("1000");
-    //     rewardsInterval = ethers.BigNumber.from("7"); // (days)
-    //     rewardsInterest = ethers.BigNumber.from("1000");
-    //     contrLimit = ethers.utils.parseEther("5");
-    //     minContr = ethers.utils.parseEther("0.1");
-    //    
-
-    //     await pb.connect(admin).setPoolMaxSize(poolMaxSize);
-    //     await pb.connect(admin).setRewardsInterval(rewardsInterval);
-    //     await pb.connect(admin).setRewardsInterest(rewardsInterest);
-    //     await pb.connect(admin).setContributionLimit(contrLimit);
-    //     await pb.connect(admin).setMinContribution(minContr);
-    //     
-    //   });
-    // });
 
   });
 

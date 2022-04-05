@@ -32,14 +32,19 @@ contract TokenBalances is PoolBase {
         return dataStorage.getUintStorage(rwEthBalTag);
     }
 
+    function getRwEthBurned() external view returns(uint){
+        bytes32 burnedRwEtherTag = keccak256(abi.encodePacked("totalBurned_rewardEther"));
+        return dataStorage.getUintStorage(burnedRwEtherTag);
+    }    
+
     function getTotalEtherStaked() external view returns(uint){
         bytes32 currentPoolSizeTag = keccak256(abi.encodePacked("total_ether_staked"));
         return dataStorage.getUintStorage(currentPoolSizeTag);
     }  
     
-    function getEthStakedByUser(address _user) external view returns(uint){
-        bytes32 stakedByUserTag = keccak256(abi.encodePacked("ether_staked_by_user", _user));
-        return dataStorage.getUintStorage(stakedByUserTag);
+    function getRwEthMintedByUser(address _user) external view returns(uint){
+        bytes32 mintedRwEtherTag = keccak256(abi.encodePacked("minted_rwEther", _user));
+        return dataStorage.getUintStorage(mintedRwEtherTag);
     }     
 
     function getTokenBalancesAddress() public view returns(address){

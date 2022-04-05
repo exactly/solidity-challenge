@@ -50,7 +50,7 @@ contract PoolClient is PoolBase {
         rwETHTokenInterface rwEthToken = rwETHTokenInterface(getContractAddress("rwETHToken"));
         bytes32 statusTag = keccak256(abi.encodePacked("isPoolLive"));
 
-        require(rwEthToken.balanceOf(msg.sender) >= _rwEtherWithdrawal, "You don't have that amount of tokens in your account.");
+        require(rwEthToken.balanceOf(msg.sender) >= _rwEtherWithdrawal, "You don't have that amount of tokens on your account.");
         require(poolVault.poolEtherSize() - rwEthToken.calcEthValue(_rwEtherWithdrawal) >= 0, "Pool size cannot be smaller than zero.");
         require(dataStorage.getBoolStorage(statusTag), "The pool is currently paused");
         _;
@@ -133,15 +133,21 @@ contract PoolClient is PoolBase {
     /// @dev Main Unstaking function. Allows users to deposit rwEther in exchange of Ether.
     /// @notice The withdrawEther function updates the total_ether_supply and its staked amount.
     /// @notice Once it is called, the rwEth amount is burned and the vault sends to this contract the ether counterpart.
+    /// @notice User needs to provide allowance to the contract to make this call (performed on the frontend of the Dapp).
     function withdraw(uint _rwEthAmount) external withdrawCompliance(_rwEthAmount) nonReentrant(){
         rwETHTokenInterface rwEthToken = rwETHTokenInterface(getContractAddress("rwETHToken"));
         PoolVaultInterface poolVault = PoolVaultInterface(getContractAddress("PoolVault"));
+        
+        require(rwEthToken.allowance(msg.sender, address(this)) >= _rwEthAmount, "Reverted: Client lacks allowance to perform this action.");
+       
+        rwEthToken.transferFrom(msg.sender, address(this), _rwEthAmount);
 
-        rwEthToken.transfer(address(this), _rwEthAmount);
         uint etherToUnstake = rwEthToken.calcEthValue(_rwEthAmount);
         rwEthToken.burn(_rwEthAmount);
+        bytes32 burnedRwEtherTag = keccak256(abi.encodePacked("totalBurned_rewardEther"));
+        dataStorage.increaseUintStorage(burnedRwEtherTag, _rwEthAmount);
 
-        poolVault.withdrawEther(msg.sender, etherToUnstake);
+        poolVault.withdrawEther(msg.sender, etherToUnstake, _rwEthAmount);
         emit UserStaked(msg.sender, etherToUnstake, block.timestamp);
     }
 

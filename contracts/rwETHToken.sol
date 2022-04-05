@@ -80,7 +80,7 @@ contract rwETHToken is PoolBase, ERC20 {
 
         // Calculate the equivalent rwEth amount (deppends on the current repricing status).
         uint etherCalc = calcEthValue(_rwEthAmount);
-        require(etherCalc < poolTokenBalances.getTotalEthSupply(), "There aren't enough backed ethers to perform this action.");
+        require(etherCalc <= poolTokenBalances.getTotalEthSupply(), "There aren't enough backed ethers to perform this action.");
         dataStorage.decreaseUintStorage(rwEthSupplyTag, _rwEthAmount);
         _burn(msg.sender, _rwEthAmount);
         emit TokensBurned(msg.sender, _rwEthAmount);
