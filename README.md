@@ -68,8 +68,8 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 - The displayed contracts within the mockup have been "exploded" into several modules of contracts for organization and operativeness.
 - The state variables and mappings are stored in a separate module **"DataStorage"**.
 - The user and the team will be only allowed to handle tokens via **"PoolClient"**.
-- The team will setup the pool settings on the **PoolBase** contract.
-<br/>
+- The team will setup the pool settings on the **PoolBase** contract. <br/>
+
 ![Staking Pool Contracts Tree drawio](https://user-images.githubusercontent.com/97247251/161981129-2f708754-9ec8-456c-bd96-d0e17aec2162.png)
 
 
