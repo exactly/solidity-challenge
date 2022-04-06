@@ -34,28 +34,19 @@ contract PoolVault is PoolBase {
         return dataStorage.getUintStorage(etherVaultedTag);
     }
 
-    function storeEther(address _from) external payable onlyByPoolContract {
-        rwETHTokenInterface rwEthToken = rwETHTokenInterface(getContractAddress("rwETHToken"));
-
+    function storeEther() external payable onlyByPoolContract {
         bytes32 etherVaultedTag = keccak256(abi.encodePacked("total_ether_staked"));
-        bytes32 mintedRwEtherTag = keccak256(abi.encodePacked("minted_rwEther", _from));
-        uint mintedRw = rwEthToken.calcRwEthValue(msg.value);
-
         dataStorage.increaseUintStorage(etherVaultedTag, msg.value);
-        dataStorage.increaseUintStorage(mintedRwEtherTag, mintedRw);
     }
     
-    function withdrawEther(address _to, uint _ethAmount, uint _rwEthAmount) external onlyByPoolContract nonReentrant() {
+    function withdrawEther(address _to, uint _ethAmount) external onlyByPoolContract nonReentrant() {
         bytes32 etherVaultedTag = keccak256(abi.encodePacked("total_ether_staked"));
         bytes32 ethBalTag = keccak256(abi.encodePacked("totalSupply_Ether"));
-        bytes32 mintedRwEtherTag = keccak256(abi.encodePacked("minted_rwEther", _to));
 
         require(dataStorage.getUintStorage(etherVaultedTag) - _ethAmount >= 0 , "Pool lacking of ether to perform this action.");
 
-
         dataStorage.decreaseUintStorage(etherVaultedTag, _ethAmount);   
         dataStorage.decreaseUintStorage(ethBalTag, _ethAmount);   
-        dataStorage.decreaseUintStorage(mintedRwEtherTag, _rwEthAmount); 
 
         (bool success, ) = payable(_to).call{value: _ethAmount}("");
         require(success);

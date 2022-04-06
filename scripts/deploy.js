@@ -4,8 +4,9 @@ async function main() {
   const [deployer] = await ethers.getSigners();
 
   console.log("Deploying contracts with the account:", deployer.address);
+  let deployerBalance = ethers.utils.formatEther(await deployer.getBalance());
 
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  console.log(`Account balance: ${deployerBalance} ETH`);
 
   const DS = await ethers.getContractFactory("DataStorage");
   const ds = await DS.deploy();
@@ -35,6 +36,7 @@ async function main() {
   // Deploying PoolBase Contract (pb):
   const PB = await ethers.getContractFactory("PoolBase");
   const pb = await PB.deploy(ds.address);
+  await pb.deployed();
 
   contracts = [ds, pb, tb, rweth, pv, pc];
   contractNames = ["DataStorage", "PoolBase", "TokenBalances", "rwETHToken", "PoolVault", "PoolClient"];

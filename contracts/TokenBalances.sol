@@ -42,10 +42,15 @@ contract TokenBalances is PoolBase {
         return dataStorage.getUintStorage(currentPoolSizeTag);
     }  
     
+    function getTotalRewardsInjected() external view returns(uint){
+        bytes32 totalRewardsInjectedTag = keccak256(abi.encodePacked("totalRewardsInjected"));   
+        return dataStorage.getUintStorage(totalRewardsInjectedTag);
+    }    
+    
     function getRwEthMintedByUser(address _user) external view returns(uint){
         bytes32 mintedRwEtherTag = keccak256(abi.encodePacked("minted_rwEther", _user));
         return dataStorage.getUintStorage(mintedRwEtherTag);
-    }     
+    }      
 
     function getTokenBalancesAddress() public view returns(address){
         bytes32 addressTag = keccak256(abi.encodePacked("contract_address", "TokenBalances"));

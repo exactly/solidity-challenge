@@ -37,7 +37,12 @@ module.exports = {
       url: "http://127.0.0.1:8545/",
     },
     rinkeby: {
-      url: process.env.NETWORK_RINKEBY_URL || "",
+      url: process.env.RINKEBY_ALCHEMY_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    ropsten: {
+      url: process.env.ROPSTEN_ALCHEMY_URL || "",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },

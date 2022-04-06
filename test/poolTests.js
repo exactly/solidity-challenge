@@ -1,7 +1,6 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 
-
 describe("Staking Pool Network", function () {
   // Environmental variables to be used among the tests.
   let provider;
@@ -15,7 +14,6 @@ describe("Staking Pool Network", function () {
   let contrLimit;
   let minContr;
   
-
   beforeEach(async() => {
 
     [admin, userA, userB, nonUser, manager] = await ethers.getSigners();
@@ -481,7 +479,70 @@ describe("Staking Pool Network", function () {
         }
      
       });
+      
+      it("Should allow a nonUser to recieve rwEth from userB and withdraw ether", async function () {
+        await pb.connect(admin).setPoolMaxSize(poolMaxSize);
+        await pb.connect(admin).setRewardsInterval(rewardsInterval);
+        await pb.connect(admin).setRewardsInterest(rewardsInterest);
+        await pb.connect(admin).setContributionLimit(contrLimit);
+        await pb.connect(admin).setMinContribution(minContr);
+        await pb.connect(admin).setPoolLive(true);  
 
+        // Fill the pool with deposits.
+        let userADeposit = ethers.utils.parseEther("1");
+        let userBDeposit = ethers.utils.parseEther("3");
+        await pc.connect(walletAccounts[1]).deposit({value: userADeposit});
+        await pc.connect(walletAccounts[2]).deposit({value: userBDeposit});
+
+        // Inject interests.
+        await pb.connect(walletAccounts[0]).setPoolLive(false);
+        await pc.connect(walletAccounts[0]).calculateRewards();
+        let rewardsToInject = await pc.connect(walletAccounts[0]).getRewardsToInject();
+        await pc.connect(walletAccounts[0]).rewardsInjector({value: rewardsToInject});
+        await pb.connect(walletAccounts[0]).setPoolLive(true);        
+
+        // User B transfers some rwEther to nonUser
+        let initB = await rweth.balanceOf(walletAddresses[2]);
+        let initC = await rweth.balanceOf(walletAddresses[3]);
+        let userBTransfer = ethers.utils.parseEther("1");
+       
+        await rweth.connect(walletAccounts[2]).transfer(walletAddresses[3], userBTransfer); //Returns true if the txn goes through.
+        
+        let finalB = await rweth.balanceOf(walletAddresses[2]);
+        let finalC = await rweth.balanceOf(walletAddresses[3]);
+
+        expect(finalC.sub(userBTransfer)).to.be.eq(initC);
+        expect(finalB.add(userBTransfer)).to.be.eq(initB);
+
+        // Checking 3 status while checking out
+        // initial states
+        let initialBalance = await rweth.balanceOf(walletAddresses[3]);
+        let totalRwSupply0 = await rweth.totalSupply();
+        let contractRwSupplyControl0 = await tb.getTotalrwEthSupply();
+        let userEtherBal0 = await provider.getBalance(walletAddresses[3]);
+
+        // Calculate the amount of ether that the UserB will get back. Gas fees are rounded.
+        let etherWithdawal = await rweth.calcEthValue(initialBalance);
+        let calcFinalEthBal = ethers.utils.formatEther((userEtherBal0.add(etherWithdawal)));
+        calcFinalEthBal = Math.round(calcFinalEthBal);
+
+        expect(pc.connect(walletAccounts[3]).withdraw(initialBalance)).to.be.revertedWith("Reverted: Client lacks allowance to perform this action.");
+        // User provides Allowance (e.g via Dapp) to PoolClient to transfer his tokens.
+        await rweth.connect(walletAccounts[3]).approve(contractsAddresses[5], initialBalance);
+        await pc.connect(walletAccounts[3]).withdraw(initialBalance);
+        
+        // final states
+        let finalBalance = await rweth.balanceOf(walletAddresses[3]);
+        let totalRwSupply1 = await rweth.totalSupply();
+        let contractRwSupplyControl1 = await tb.getTotalrwEthSupply();
+        let userEtherBal1 = ethers.utils.formatEther(await provider.getBalance(walletAddresses[3]));
+        userEtherBal1 = Math.round(userEtherBal1);    
+        
+        expect(finalBalance).to.be.eq(0);
+        expect(totalRwSupply0.sub(totalRwSupply1)).to.be.eq(initialBalance);
+        expect(contractRwSupplyControl0.sub(contractRwSupplyControl1)).to.be.eq(initialBalance);
+        expect(userEtherBal1).to.be.eq(calcFinalEthBal);
+      })
   });
 
 

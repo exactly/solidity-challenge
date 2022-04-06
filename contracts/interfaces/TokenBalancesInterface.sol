@@ -9,6 +9,7 @@ interface TokenBalancesInterface {
     function getRwEthBurned() external view returns(uint);   
 
     function getTotalEtherStaked() external view returns(uint);
+    function getTotalRewardsInjected() external view returns(uint);
     function getRwEthMintedByUser(address _user) external view returns(uint);     
     function getTokenBalancesAddress() external view returns(address);
 }

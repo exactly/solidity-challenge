@@ -73,14 +73,15 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     /// @dev Sets the Pool Maximium size expressed on ether.
     /// @param _maxSize is a WEI value (or BigInt / BigNumber).
     function setPoolMaxSize(uint _maxSize) public onlyRole(POOL_MANAGER) {
-        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
+        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently live.");
         bytes32 poolMaxSizeTag = keccak256(abi.encodePacked("poolMaxSize"));
         dataStorage.setUintStorage(poolMaxSizeTag, _maxSize);
     }    
 
     /// @dev Set the interval in days of the rewards period.
     function setRewardsInterval(uint _daysToRewards) public onlyRole(POOL_MANAGER) {
-        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
+        require(_daysToRewards >= 1, "The minimum rewards interval is one day.");
+        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently live.");
         bytes32 daysRewTag = keccak256(abi.encodePacked("daysToRewards"));
         dataStorage.setUintStorage(daysRewTag, _daysToRewards);
     }
@@ -89,7 +90,7 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     /// @param _rewardsInterest within the storage has 6 decimals.
     /// @notice E.G. If 0.001134 rate is desired, 0.001134 * (10**6) = 1134.
     function setRewardsInterest(uint _rewardsInterest) public onlyRole(POOL_MANAGER) {
-        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
+        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently live.");
         bytes32 rewardsIntTag = keccak256(abi.encodePacked("rewardsInterestPerPeriod"));
         dataStorage.setUintStorage(rewardsIntTag, _rewardsInterest);
     }
@@ -97,7 +98,7 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     /// @dev Set the max. contribution allowed for each user.
     /// @param _newContrLimit is a WEI value.
     function setContributionLimit(uint _newContrLimit) public onlyRole(POOL_MANAGER){
-        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
+        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently live.");
         bytes32 contrLimitTag = keccak256(abi.encodePacked("contributionLimit"));
         dataStorage.setUintStorage(contrLimitTag, _newContrLimit);
     }
@@ -106,7 +107,7 @@ contract PoolBase is AccessControl, ReentrancyGuard{
     /// @param _newMinContr is a WEI value.
     function setMinContribution(uint _newMinContr) public onlyRole(POOL_MANAGER){
         bytes32 contrLimitTag = keccak256(abi.encodePacked("contributionLimit"));
-        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently closed.");
+        require(!dataStorage.getBoolStorage(keccak256(abi.encodePacked("isPoolLive"))), "The pool is currently live.");
         require(dataStorage.getUintStorage(contrLimitTag) > _newMinContr, "The min. contr. limit needs to be smaller than the max. limit.");
         
         bytes32 minContrTag = keccak256(abi.encodePacked("minContribution"));
