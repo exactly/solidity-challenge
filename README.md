@@ -106,6 +106,8 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 - The ether deposited as well as the rewards injected (more ether) are stored within a "vaulted contract" a.k.a PoolVault. No user or team member can access the funds of that contract directly. They can only be accesed by the PoolClient contract.
 - While withdrawing, both payable(to).call and reentrancy mutex are combined to prevent attacks. To keep the rwEth balance, the tokens are burned.
 
+## F) Scripts
+The project provides scripts to set quickly the pool variables and perform several actions. Also, it is provided a balance getter script that not only retrieves the pool balance but also checks that the balance is the same as the one stored in the contract mapping.
 
 ## Tool: Interest Calculator for a Period of Time (takes APY as input)
 https://github.com/lior-abadi/challenge/blob/main/Theory%20and%20Initial%20Mockups/Interest%20Calculator.xlsm
