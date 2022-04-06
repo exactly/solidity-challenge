@@ -55,6 +55,13 @@ Create a script (or a Hardhat task) to query the total amount of ETH held in the
 _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 
 # Solution - Repricing Approach
+## 0) Verified Contracts Ropsten Links
+- DataStorage: https://ropsten.etherscan.io/address/0x5d8c2fd496A05bb68329Fe39E8A12B424D25E1b4
+- PoolBase: https://ropsten.etherscan.io/address/0x601a16CEBd0E607822995B2E8407891AE6BE4bAb
+- TokenBalances: https://ropsten.etherscan.io/address/0x169105b18148b45acb1d4e0354f48a17fe560629
+- rwEthToken: https://ropsten.etherscan.io/address/0x0Ddf2C71Ca974A6c40A0Fb83f670029AA7D678ea
+- PoolVault: https://ropsten.etherscan.io/address/0xeb69E5c8F8Bb00F683ffb9589466CD4D20325D60
+- PoolClient: https://ropsten.etherscan.io/address/0xdB0210D3FdAFCAA410811D9aa7034E64dde31DdF
 
 ## B) Mockup and Project Theorical Context (click on image to enlarge)
 - The interest period can be modified just by injecting rewards in a different time-range.
