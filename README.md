@@ -58,7 +58,7 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 
 ## B) Mockup and Project Theorical Context (click on image to enlarge)
 - The interest period can be modified just by injecting rewards in a different time-range.
-- The amount to inject is calculated with a contract function that takes as input the fixed interest rate for the current interest period. [Here](#Tool:-Interest-Calculator-for-a-Period-of-Time-(takes-APY-as-input)) is a simple tool to get a fast calculus of the interests.
+- The amount to inject is calculated with a contract function that takes as input the fixed interest rate for the current interest period. [Here](#tool-interest-calculator-for-a-period-of-time-takes-apy-as-input) is a simple tool to get a fast calculus of the interests.
 - On the beginning, a fee was meant to be charged for each transaction with the pool. That proposal is dismissed for the pool implementation. The fee can be implicit with the current interest rate of the pool. For example, if the market is offering an average of 5% yearly yield, while giving 4.9% p.y, you are implicitly charging a 0.1% yearly.
 
 ![staking_pool_mockup](https://user-images.githubusercontent.com/97247251/161336936-f695fd52-26ff-45c2-9f94-a84f56471c29.png)
