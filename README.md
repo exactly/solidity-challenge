@@ -56,14 +56,14 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 
 # Solution
 
-## B) Mockup and Project Theorical Context
+## B) Mockup and Project Theorical Context (click on image to enlarge)
 - The interest period can be modified just by injecting rewards in a different time-range.
 - The amount to inject is calculated with a contract function that takes as input the fixed interest rate for the current interest period.
 
 ![staking_pool_mockup](https://user-images.githubusercontent.com/97247251/161336936-f695fd52-26ff-45c2-9f94-a84f56471c29.png)
 
 
-## C) Contract Relationships Tree
+## C) Contract Relationships Tree (click on image to enlarge)
 - The displayed contracts within the mockup have been "exploded" into several modules of contracts for organization and operativeness.
 - The state variables and mappings are stored in a separate module **"DataStorage"**.
 - The user and the team will be only allowed to handle tokens via **"PoolClient"**.
