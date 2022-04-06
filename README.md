@@ -54,7 +54,7 @@ Create a script (or a Hardhat task) to query the total amount of ETH held in the
 
 _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 
-# Solution
+# Solution - Repricing Approach
 
 ## B) Mockup and Project Theorical Context (click on image to enlarge)
 - The interest period can be modified just by injecting rewards in a different time-range.
