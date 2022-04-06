@@ -70,6 +70,9 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 - The user and the team will be only allowed to handle tokens via **"PoolClient"**.
 - The team will setup the pool settings on the **PoolBase** contract.
 
+![Staking Pool Contracts Tree drawio](https://user-images.githubusercontent.com/97247251/161981129-2f708754-9ec8-456c-bd96-d0e17aec2162.png)
+
+
 ## D) Usage and Deployment Inscructions
 ### 1) Deployment order and constuctor parameters ()
 - DataStorage(), TokenBalances(_dataStorageAddress), rwETHToken(_dataStorageAddress), PoolVault(_dataStorageAddress), PoolClient(_dataStorageAddress), PoolBase(_dataStorageAddress).
@@ -80,10 +83,6 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 - The team or manager needs to call from PoolBase: **setPoolMaxSize**, **setRewardsInterval**, **setRewardsInterest**, **setContributionLimit**, **setMinContribution**. Those functions can only be called if the investing pool is closed (deposits and withdrawals are halted).
 - To set the pool as operational, the team or manager just needs to call **setPoolLive** from the PoolBase Contract.
 - It is advised to setup also managing roles for the management of the PoolClient Contract by calling the **addPoolManager** function from the mentioned contract. 
-
-
-![Staking Pool Contracts Tree drawio](https://user-images.githubusercontent.com/97247251/161981129-2f708754-9ec8-456c-bd96-d0e17aec2162.png)
-
 
 ### 2) Operating the Pool
 - While being live, the users can deposit ether and getting rwEther back by calling **deposit** from the **PoolClient** contract. The amount of rwEther that they get back depends on the current locked ether and rwEther supplies (repricing). 
