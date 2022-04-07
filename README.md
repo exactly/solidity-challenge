@@ -10,6 +10,7 @@ The challenge
 The solution
 - [Solution - Repricing Approach](#solution---repricing-approach)
 - [0) Ropsten Verified Contracts](#0-ropsten-verified-contracts)
+- [A) Solution Summary](#a-solution-summary)
 - [B) Mockup and Project Theorical Context](#b-mockup-and-project-theorical-context-click-on-image-to-enlarge)
 - [C) Contract Relationships Tree](#c-contract-relationships-tree-click-on-image-to-enlarge)
 - [D) Usage and Deployment Instructions](#d-usage-and-deployment-instructions)
