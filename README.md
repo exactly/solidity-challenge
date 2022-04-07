@@ -110,16 +110,12 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 ## F) Tests Results and Gas Consumption
 - All tests were performed using the Hardhat Localhost Node.
 
-### Tests Results
 
 ![image](https://user-images.githubusercontent.com/97247251/162186241-d4c3dc5f-fb09-4122-8edd-98d8105c2c3d.png)
 
 
 ![image](https://user-images.githubusercontent.com/97247251/162186177-76a0bc28-f122-4c34-addc-0cacec8697e1.png)
 
-### Gas Consumption
-
-![image](https://user-images.githubusercontent.com/97247251/162186177-76a0bc28-f122-4c34-addc-0cacec8697e1.png)
 
 
 ## G) Scripts
