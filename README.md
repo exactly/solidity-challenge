@@ -135,7 +135,7 @@ The Pool Contract Network:
 - In addition to the latter, no internal mapping of "amount staked by user" is performed (allowing you to get some tokens by transfer and cashing out the rewards assigned to that amount of rwEther). It is checked the user balance of the reward tokens instead. 
 - The ether deposited as well as the rewards injected (more ether) are stored within a "vaulted contract" a.k.a PoolVault. No user or team member can access the funds of that contract directly. They can only be accesed by the PoolClient contract.
 - While withdrawing, both payable(to).call and reentrancy mutex are combined to prevent attacks. To keep the rwEth balance, the tokens are burned.
-- The withdrawer needs to provide allowance to the PoolClient contract for the amount of tokens to be withdrawn. While having a frontend, that approval request can be triggered before calling the withdraw method.
+- **IMPORTANT** The withdrawer needs to provide allowance to the PoolClient contract for the amount of tokens to be withdrawn. While having a frontend, that approval request can be triggered before calling the withdraw method.
 
 ## F) Tests Results and Gas Consumption
 - All tests were performed using the Hardhat Localhost Node.
