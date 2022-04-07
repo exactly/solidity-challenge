@@ -80,7 +80,7 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 ![Staking Pool Contracts Tree drawio](https://user-images.githubusercontent.com/97247251/161981129-2f708754-9ec8-456c-bd96-d0e17aec2162.png)
 
 
-## D) Usage and Deployment Inscructions
+## D) Usage and Deployment Instructions
 ### 1) Deployment order and constuctor parameters ()
 - DataStorage(), TokenBalances(_dataStorageAddress), rwETHToken(_dataStorageAddress), PoolVault(_dataStorageAddress), PoolClient(_dataStorageAddress), PoolBase(_dataStorageAddress).
 
@@ -105,6 +105,7 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 - In addition to the latter, no internal mapping of "amount staked by user" is performed (allowing you to get some tokens by transfer and cashing out the rewards assigned to that amount of rwEther). It is checked the user balance of the reward tokens instead. 
 - The ether deposited as well as the rewards injected (more ether) are stored within a "vaulted contract" a.k.a PoolVault. No user or team member can access the funds of that contract directly. They can only be accesed by the PoolClient contract.
 - While withdrawing, both payable(to).call and reentrancy mutex are combined to prevent attacks. To keep the rwEth balance, the tokens are burned.
+- The withdrawer needs to provide allowance to the PoolClient contract for the amount of tokens to be withdrawn. While having a frontend, that approval request can be triggered before calling the withdraw method.
 
 ## F) Scripts
 The project provides scripts to set quickly the pool variables and perform several actions. Also, it is provided a balance getter script that not only retrieves the pool balance but also checks that the balance is the same as the one stored in the contract mapping.
