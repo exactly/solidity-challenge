@@ -107,7 +107,22 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 - While withdrawing, both payable(to).call and reentrancy mutex are combined to prevent attacks. To keep the rwEth balance, the tokens are burned.
 - The withdrawer needs to provide allowance to the PoolClient contract for the amount of tokens to be withdrawn. While having a frontend, that approval request can be triggered before calling the withdraw method.
 
-## F) Scripts
+## F) Tests Results and Gas Consumption
+- All tests were performed using the Hardhat Localhost Node.
+
+### Tests Results
+
+![image](https://user-images.githubusercontent.com/97247251/162186241-d4c3dc5f-fb09-4122-8edd-98d8105c2c3d.png)
+
+
+![image](https://user-images.githubusercontent.com/97247251/162186177-76a0bc28-f122-4c34-addc-0cacec8697e1.png)
+
+### Gas Consumption
+
+![image](https://user-images.githubusercontent.com/97247251/162186177-76a0bc28-f122-4c34-addc-0cacec8697e1.png)
+
+
+## G) Scripts
 The project provides scripts to set quickly the pool variables and perform several actions. Also, it is provided a balance getter script that not only retrieves the pool balance but also checks that the balance is the same as the one stored in the contract mapping.
 
 ## Tool: Interest Calculator for a Period of Time (takes APY as input)
