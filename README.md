@@ -1,4 +1,10 @@
 # Smart Contract Challenge
+## Index
+- [Challenge Itself](#a-challenge)
+&nbsp; - [Setup a project and create a contract](#1-setup-a-project-and-create-a-contract) 
+
+
+
 
 ## A) Challenge
 
