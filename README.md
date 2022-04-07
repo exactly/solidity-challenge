@@ -1,12 +1,13 @@
 # Smart Contract Challenge
 ## Index
+ <br/>  
 The challenge
 - [Challenge Itself](#a-challenge)
 - [1) Setup a project and create a contract](#1-setup-a-project-and-create-a-contract) 
 - [2) Write tests](#2-write-tests) 
 - [3) Deploy your contract](#3-deploy-your-contract) 
 - [4) Interact with the contract](#4-interact-with-the-contract) 
- <br/> 
+ <br/>  
 The solution
 - [Solution - Repricing Approach](#solution---repricing-approach)
 - [0) Ropsten Verified Contracts](#0-ropsten-verified-contracts)
