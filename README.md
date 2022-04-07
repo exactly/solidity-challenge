@@ -1,10 +1,19 @@
 # Smart Contract Challenge
 ## Index
 - [Challenge Itself](#a-challenge)
-- &nbsp; [Setup a project and create a contract](#1-setup-a-project-and-create-a-contract) 
+- [1) Setup a project and create a contract](#1-setup-a-project-and-create-a-contract) 
+- [2) Write tests](#2-write-tests) 
+- [3) Deploy your contract](#3-deploy-your-contract) 
+- [4) Interact with the contract](#4-interact-with-the-contract) 
 
-
-
+- [Solution - Repricing Approach](#solution---repricing-approach)
+- [0) Ropsten Verified Contracts](#0-ropsten-verified-contracts)
+- [B) Mockup and Project Theorical Context](#b-mockup-and-project-theorical-context-click-on-image-to-enlarge)
+- [C) Contract Relationships Tree](#c-contract-relationships-tree-click-on-image-to-enlarge)
+- [D) Usage and Deployment Instructions](#d-usage-and-deployment-instructions)
+- [E) Security Measures Taken](#e-security-measures-taken)
+- [F) Tests Results and Gas Consumption](#f-tests-results-and-gas-consumption)
+- [G) Scripts](#g-scripts)
 
 ## A) Challenge
 
@@ -88,24 +97,24 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 
 ## D) Usage and Deployment Instructions
 ### 1) Deployment order and constuctor parameters ()
-- DataStorage(), TokenBalances(_dataStorageAddress), rwETHToken(_dataStorageAddress), PoolVault(_dataStorageAddress), PoolClient(_dataStorageAddress), PoolBase(_dataStorageAddress).
+- `DataStorage(), TokenBalances(_dataStorageAddress), rwETHToken(_dataStorageAddress), PoolVault(_dataStorageAddress), PoolClient(_dataStorageAddress), PoolBase(_dataStorageAddress)`.
 
 ### 2) Setting up the Pool
-- The Admin (deployer) can add local managers to assist with the task of managing de pool. The managers added will work only on the contract from where the **addPoolManager** function was called. This helps to constraint the range of application of the managers permissions. The **addPoolManager** is available on the **PoolBase** contract and all of their childs.
-- Once every pool contract is deployed, only the Admin (Storage guardian) should call dataStorage:  **setStorageLive()**.
-- The team or manager needs to call from PoolBase: **setPoolMaxSize**, **setRewardsInterval**, **setRewardsInterest**, **setContributionLimit**, **setMinContribution**. Those functions can only be called if the investing pool is closed (deposits and withdrawals are halted).
-- To set the pool as operational, the team or manager just needs to call **setPoolLive** from the PoolBase Contract.
-- It is advised to setup also managing roles for the management of the PoolClient Contract by calling the **addPoolManager** function from the mentioned contract. 
+- The Admin (deployer) can add local managers to assist with the task of managing de pool. The managers added will work only on the contract from where the `addPoolManager` function was called. This helps to constraint the range of application of the managers permissions. The `addPoolManager` is available on the `PoolBase` contract and all of their childs.
+- Once every pool contract is deployed, only the Admin (Storage guardian) should call dataStorage:  `setStorageLive()`.
+- The team or manager needs to call from PoolBase: `setPoolMaxSize`, `setRewardsInterval`, `setRewardsInterest`, `setContributionLimit`, `setMinContribution`. Those functions can only be called if the investing pool is closed (deposits and withdrawals are halted).
+- To set the pool as operational, the team or manager just needs to call `setPoolLive` from the PoolBase Contract.
+- It is advised to setup also managing roles for the management of the PoolClient Contract by calling the `addPoolManager` function from the mentioned contract. 
 
 ### 2) Operating the Pool
-- While being live, the users can deposit ether and getting rwEther back by calling **deposit** from the **PoolClient** contract. The amount of rwEther that they get back depends on the current locked ether and rwEther supplies (repricing). 
-- Once the rewarding time has passed, the team needs to **setPoolLive** as false and call **calculateRewards** from the **PoolClient** contract. Once the rewards are calculated, they can be get by calling **getRewardsToInject** (please note that the output of this function will be a WEI value, 18 decimals).
-- Afterwards, the team needs to inject the exact same amount returned from before of ether in concept of rewards into the pool by calling **rewardsInjector** (remember that the role clearances of the **PoolBase** contract are not passed through the **PoolClient**; if it is desired to call this function by a team member, their role must be assigned within this contract). 
+- While being live, the users can deposit ether and getting rwEther back by calling `deposit` from the `PoolClient` contract. The amount of rwEther that they get back depends on the current locked ether and rwEther supplies (repricing). 
+- Once the rewarding time has passed, the team needs to `setPoolLive` as false and call `calculateRewards` from the `PoolClient` contract. Once the rewards are calculated, they can be get by calling `getRewardsToInject` (please note that the output of this function will be a WEI value, 18 decimals).
+- Afterwards, the team needs to inject the exact same amount returned from before of ether in concept of rewards into the pool by calling `rewardsInjector` (remember that the role clearances of the `PoolBase` contract are not passed through the `PoolClient`; if it is desired to call this function by a team member, their role must be assigned within this contract). 
 - NOTE: When the team injects rewards the equilibrium between both ether and reward ether supplies is broken, this is when the repricing system starts to work.
-- After the team injected the rewards and set the pool as live, the users can leave their tokens staking or withdraw their funds by calling **withdraw(rewards to cash out)** from the **PoolClient** contract.
+- After the team injected the rewards and set the pool as live, the users can leave their tokens staking or withdraw their funds by calling `withdraw(rewards to cash out)` from the `PoolClient` contract.
 
 ## E) Security Measures Taken
-- Pool contract calls can only be performed between contracts of the pool. To perform this action, the **onlyByPoolContract** modifier of the DataStorage contract, while deploying, checks that the transaction origin is the same as the one of the guardian (deployer of DataStorage). It is extremely important that the deployments are made directly by the Guardian (deployer a.k.a admin) instead of using third party contracts that may result on storing a malicious contract (tx.origin is checked). It is a key factor to setup the storage live once every contract is deployed thus not checking anymore the tx.origin as a condition. 
+- Pool contract calls can only be performed between contracts of the pool. To perform this action, the `onlyByPoolContract` modifier of the DataStorage contract, while deploying, checks that the transaction origin is the same as the one of the guardian (deployer of DataStorage). It is extremely important that the deployments are made directly by the Guardian (deployer a.k.a admin) instead of using third party contracts that may result on storing a malicious contract (tx.origin is checked). It is a key factor to setup the storage live once every contract is deployed thus not checking anymore the tx.origin as a condition. 
 - Reentrancy mutex modifier has been applied into relevant functions.
 - By using an ERC20 compliant model for the rwETH token, they can be transfered between accound freely. 
 - In addition to the latter, no internal mapping of "amount staked by user" is performed (allowing you to get some tokens by transfer and cashing out the rewards assigned to that amount of rwEther). It is checked the user balance of the reward tokens instead. 
