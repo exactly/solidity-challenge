@@ -125,7 +125,7 @@ The Pool Contract Network:
 - While being live, the users can deposit ether and getting rwEther back by calling `deposit` from the `PoolClient` contract. The amount of rwEther that they get back depends on the current locked ether and rwEther supplies (repricing). 
 - Once the rewarding time has passed, the team needs to `setPoolLive` as false and call `calculateRewards` from the `PoolClient` contract. Once the rewards are calculated, they can be get by calling `getRewardsToInject` (please note that the output of this function will be a WEI value, 18 decimals).
 - Afterwards, the team needs to inject the exact same amount returned from before of ether in concept of rewards into the pool by calling `rewardsInjector` (remember that the role clearances of the `PoolBase` contract are not passed through the `PoolClient`; if it is desired to call this function by a team member, their role must be assigned within this contract). 
-- NOTE: When the team injects rewards the equilibrium between both ether and reward ether supplies is broken, this is when the repricing system starts to work.
+- ***NOTE:*** When the team injects rewards the equilibrium between both ether and reward ether supplies is broken, this is when the repricing system starts to work.
 - After the team injected the rewards and set the pool as live, the users can leave their tokens staking or withdraw their funds by calling `withdraw(rewards to cash out)` from the `PoolClient` contract. Users need to approve the PoolClient contract with the amount of tokens to cash out before trying to withdraw their funds. This action can be performed directly from the rwETHToken contract or from the frontend of the pool (trigger approval request before calling withdraw method).  
 
 ## E) Security Measures Taken
@@ -135,7 +135,7 @@ The Pool Contract Network:
 - In addition to the latter, no internal mapping of "amount staked by user" is performed (allowing you to get some tokens by transfer and cashing out the rewards assigned to that amount of rwEther). It is checked the user balance of the reward tokens instead. 
 - The ether deposited as well as the rewards injected (more ether) are stored within a "vaulted contract" a.k.a PoolVault. No user or team member can access the funds of that contract directly. They can only be accesed by the PoolClient contract.
 - While withdrawing, both payable(to).call and reentrancy mutex are combined to prevent attacks. To keep the rwEth balance, the tokens are burned.
-- **IMPORTANT** The withdrawer needs to provide allowance to the PoolClient contract for the amount of tokens to be withdrawn. While having a frontend, that approval request can be triggered before calling the withdraw method.
+- **IMPORTANT:** The withdrawer needs to provide allowance to the PoolClient contract for the amount of tokens to be withdrawn. While having a frontend, that approval request can be triggered before calling the withdraw method.
 
 ## F) Tests Results and Gas Consumption
 - All tests were performed using the Hardhat Localhost Node.
