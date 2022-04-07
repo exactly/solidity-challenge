@@ -80,6 +80,17 @@ _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
 - PoolVault: https://ropsten.etherscan.io/address/0xeb69E5c8F8Bb00F683ffb9589466CD4D20325D60
 - PoolClient: https://ropsten.etherscan.io/address/0xdB0210D3FdAFCAA410811D9aa7034E64dde31DdF
 
+## A) Solution Summary
+The pool is works with a token repricing rewards system where each rewards injection modifies the supply ***equilibrium*** of both locked ether and rewards ether. 
+The Pool Contract Network is made of several contracts (modular) in order to preserve the integrity of the whole pool making it easier to interact, manage and    safeguard. The team will have to setup the pool variables on a separate contract from the one that will be used for proper staking and token-related transactions.
+The Pool Contract Network:
+- **DataStorage:** Storage for every mapping and state variable that needs to be tracked or modified of the pool. It can only be accesed through other pool contracts.
+- **PoolBase:** Environment to set every pool setting and functioning variable. Only for the team.
+- **TokenBalances:** Getter contract for variables of interest.
+- **rwETHToken:** ERC-20 compliant protocol for the rewards token as well as the calculations of exchange rates.
+- **PoolVault:** Sealed Vault where all the tokens are sent and stored. Anyone but other contracts from the pool can access it.
+- **PoolClient:** Interface between the stakers and the pool. From where every user can deposit and withdraw their funds.
+
 ## B) Mockup and Project Theorical Context (click on image to enlarge)
 - The interest period can be modified just by injecting rewards in a different time-range.
 - The amount to inject is calculated with a contract function that takes as input the fixed interest rate for the current interest period. [Here](#tool-interest-calculator-for-a-period-of-time-takes-apy-as-input) is a simple tool to get a fast calculus of the interests.
