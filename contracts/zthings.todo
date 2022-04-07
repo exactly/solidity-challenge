@@ -1,0 +1,10 @@
+Variables of interest:
+    ☐ totalSupply_Ether
+    ☐ totalSupply_rewardEther
+    ☐ ether_staked_by_user
+    ☐ total_ether_staked
+
+Testing:
+    ☐ Re-arrange the require for paused on PoolClient Modifiers
+
+
