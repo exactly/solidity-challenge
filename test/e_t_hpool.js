@@ -1,6 +1,7 @@
 const ETHpool = artifacts.require("ETHpool");
 const truffleAssert = require('truffle-assertions');
 
+const contractName = 'ETHpool'
 
 /*
  * uncomment accounts to access the test accounts made available by the
@@ -9,7 +10,7 @@ const truffleAssert = require('truffle-assertions');
  */
 
 
-contract("ETHpool", function (accounts) {
+contract(contractName, function (accounts) {
   it("Should return the list of accounts", async () => {
     console.log(accounts);
   });
@@ -21,7 +22,7 @@ contract("ETHpool", function (accounts) {
 
   it("Should return the name", async () => {
     const value = await instance.name();
-    assert.equal(value, 'ETHPool');
+    assert.equal(value, contractName)
   });
 
   /*
@@ -48,43 +49,68 @@ contract("ETHpool", function (accounts) {
       var accountT = accounts[0]
 
       //A -> 100
+      const stakeA = 100
+      const stakeFromAvalue = web3.utils.toWei('' + stakeA, "gwei")
       const stakeFromA = await instance.Stake({
         'from': accountA,
-        'value': web3.toWei(100, "gwei")
+        'value': stakeFromAvalue
       });
+      truffleAssert.eventEmitted(stakeFromA, 'StakeEvent', (event) => {
+        return event._value == stakeFromAvalue
+      })
       const poolStatusA = await instance.poolStatus()
-      assert.equal(poolStatusA.poolBalance, web3.toWei(100, "gwei"));
+      assert.equal(poolStatusA.poolBalance, stakeFromAvalue);
+
 
       //B -> 300
+      const stakeB = 300
+      const stakeFromBvalue = web3.utils.toWei('' + stakeB, "gwei")
       const stakeFromB = await instance.Stake({
         'from': accountB,
-        'value': web3.toWei(300, "gwei")
+        'value': stakeFromBvalue
       });
+      truffleAssert.eventEmitted(stakeFromB, 'StakeEvent', (event) => {
+        return event._value == stakeFromBvalue
+      })
       const poolStatusB = await instance.poolStatus()
-      assert.equal(poolStatusB.poolBalance, web3.toWei(400, "gwei"));
+      assert.equal(poolStatusB.poolBalance, web3.utils.toWei('' + (stakeA + stakeB), "gwei"));//A+B
 
       //T -> 200
-      const rewardFromT = await instance.Stake({
-        'from': accountAT,
-        'value': web3.towei(200, "gwei")
+      const rewardT = 200
+      const rewardFromTvalue = web3.utils.toWei('' + rewardT, "gwei")
+      const rewardFromT = await instance.DepositRewards({
+        'from': accountT,
+        'value': rewardFromTvalue
       });
+      truffleAssert.eventEmitted(rewardFromT, 'DepositRewardsEvent', (event) => {
+        return event._rewards == rewardFromTvalue
+      })
       const poolStatusT = await instance.poolStatus()
-      assert.equal(poolStatusT.rewardsBalance, web3.toWei(200, "gwei"));
+      assert.equal(poolStatusT.rewardsBalance, rewardFromTvalue);
 
 
       //A <- 150
       const withdrawA = await instance.Withdraw({
         'from': accountA
       });
-      assert.equal(withdrawA, web3.toWei(150, "gwei"));
+      truffleAssert.prettyPrintEmittedEvents(withdrawA)
+      truffleAssert.eventEmitted(withdrawA, 'WithdrawEvent', (event) => {
+        //console.log("Llegó a WithdrawEvent",web3.utils.toWei(''+(stakeA+rewardT*(stakeA/(stakeA+stakeB))), "gwei"))
+        //150000000000 150000000000 50000000000
+        return event._value == web3.utils.toWei('' + (stakeA + rewardT * (stakeA / (stakeA + stakeB))), "gwei")
+      })
 
       //B <- 450
       const withdrawB = await instance.Withdraw({
         'from': accountB
       });
-      assert.equal(withdrawB, web3.toWei(450, "gwei"));
-    })
-
+      truffleAssert.prettyPrintEmittedEvents(withdrawB)
+      truffleAssert.eventEmitted(withdrawB, 'WithdrawEvent', (event) => {
+        //console.log("Llegó a WithdrawEvent",web3.utils.toWei(''+(stakeA+rewardT*(stakeA/(stakeA+stakeB))), "gwei"))
+        //150000000000 150000000000 50000000000
+        return event._value == web3.utils.toWei('' + (stakeB + rewardT * (stakeB / (stakeA + stakeB))), "gwei")
+      })
+    });
 
   it('Should fail: pausePool called by not Team members', async () => {
     await truffleAssert.reverts(instance.pausePool({

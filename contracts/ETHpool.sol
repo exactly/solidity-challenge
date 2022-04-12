@@ -5,6 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 //But, if you want it...
 //import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
 //using SafeMath for uint; // 
+//Better use Pausable Library, but it's only for fun
 
 /*
 Summary
@@ -52,7 +53,7 @@ B should only get their deposit because rewards were sent to the pool before the
 */
 
 contract ETHpool {
-    string public constant name = "ETHPool";
+    string public constant name = "ETHpool";
     enum State {Running, Paused, Ended } //staking can be done only if it state is running.
     uint constant ROUNDING_CONSTANT = 10e18; //To minimize rounding errors at divisions
 
@@ -80,6 +81,13 @@ contract ETHpool {
     mapping( address => TeamMember) public Team;
     Pool public poolStatus;
 
+    //Some events to get data outside of the blockchain
+    event StakeEvent(address indexed _from, uint _value);
+    event WithdrawEvent(address indexed _to, uint _value);
+    event DepositRewardsEvent(uint _poolBalance, uint _rewards);
+
+
+
     constructor(){
         Team[msg.sender]._role = true; // Team member role assigned.
         poolStatus.status = State.Running;
@@ -105,6 +113,7 @@ contract ETHpool {
         else{
             revert("Pool is empty!");
         }
+        emit DepositRewardsEvent(poolStatus.poolBalance, poolStatus.rewardsBalance);
         return poolStatus.poolBalance;
     }
     
@@ -128,6 +137,7 @@ contract ETHpool {
             UserList[msg.sender]._timeStaking = block.timestamp;
             poolStatus.poolBalance += newStaking; //do not forget old funds!
         }
+        emit StakeEvent(msg.sender, UserList[msg.sender]._currentBalance);
     }
 
     // Withdraw: Allows users to withdraw their deposits and rewards proportional at the time being.
@@ -143,6 +153,7 @@ contract ETHpool {
         // Did you reentrant? (yes) what did it cost? (everything)
         if (payable(msg.sender).send(allowedToWithdraw)) {        
             delete UserList[msg.sender];
+            emit WithdrawEvent(msg.sender,allowedToWithdraw);
             return allowedToWithdraw;
         } else {
             UserList[msg.sender]._currentBalance = balanceFromPool;
