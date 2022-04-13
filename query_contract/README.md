@@ -17,7 +17,7 @@ It will return data about the balance of the pool (total staked), of the rewards
 - Web3.py installed
 > pip install Web3
 > or
-> pip install -r requirements.txt (it will install a lot of bloatware, you're noticed)
+> pip install -r requirements.txt (it will install a lot of bloatware, you have been warned)
 
 
 Example:
@@ -46,7 +46,18 @@ Example:
 
 _Contract verified at: https://ropsten.etherscan.io/address/0x40985d7c0357e31332860ffdea279e23ec0d5fc3#code_
 
-At the time being, numbers are 0 because some issues with Ropsten faucets.
+At the time being, numbers are 0 because some issues with Ropsten faucets. In local scenarios, it appears like the following output:
+
+> py .\queryEthPool.py
+> Connected? True
+> Balance of Wallet Test: 0 ropstenETH
+> Ahora vamos al contrato...
+> Pool Balance: 400
+> Rewards Balance: 200
+> Last Reward Multiplied: 5000000000000000000
+> Rewards count: 1
+> Last Reward Time: 1649883959
+> Status: 0
 
 ### Interact with the contract
 

@@ -51,6 +51,10 @@ infura_file.close()
 
 INFURA_RPC_URL = "https://ropsten.infura.io/v3/"+infura_key
 
+#Local: 
+#INFURA_RPC_URL = "http://127.0.0.1:8545"
+#CONTRACT_ADDRESS = "0xF86028676549f778d2b4EC618f9C69d4b24B9016"
+
 #Address:
 
 #GAS LIMITS:
@@ -85,47 +89,6 @@ def getBalanceOfPool( instance ):
 def checkAddress(addr):
     return w3.isAddress(addr)
 
-def transferTokens( addr , amount ):
-    if BE_VERBOSE: print( addr," --> ", amount)
-    contractInstance = loadContract(abi=CONTRACT_ABI,contractAddress=CONTRACT_ADDRESS)
-    if BE_VERBOSE: print( "CONTRACT LOADED --> ", contractInstance)
-    account = setupAccount()
-    if BE_VERBOSE: print( "WALLET LOADED --> ", account.address)
-    trnxToken = sendTokenToAddr(contractInstance,addr,amount=amount,fromAddress=account.address)
-    if BE_VERBOSE: print( "TX SENT (HASH) --> ", w3.toHex(trnxToken))
-    receipt = w3.eth.wait_for_transaction_receipt(trnxToken)
-    return (receipt,w3.toHex(trnxToken))
-
-def closeAuction( auctionID  ):
-    if BE_VERBOSE: print( "AuctionID"," --> ", auctionID)
-    contractInstance = loadContract(abi=CONTRACT_ABI,contractAddress=CONTRACT_ADDRESS)
-    if BE_VERBOSE: print( "CONTRACT LOADED --> ", contractInstance)
-    account = setupAccount()
-    if BE_VERBOSE: print( "WALLET LOADED --> ", account.address)
-    trnxToken = callCloseAuction(contractInstance,auctionId=auctionID,fromAddress=account.address)
-    if BE_VERBOSE: print( "TX SENT (HASH) --> ", w3.toHex(trnxToken))
-    receipt = w3.eth.wait_for_transaction_receipt(trnxToken)
-    return (receipt,w3.toHex(trnxToken))
-
-def closeAuctionNOWAIT( auctionID  ):
-    if BE_VERBOSE: print( "AuctionID"," --> ", auctionID)
-    contractInstance = loadContract(abi=CONTRACT_ABI,contractAddress=CONTRACT_ADDRESS)
-    if BE_VERBOSE: print( "CONTRACT LOADED --> ", contractInstance)
-    account = setupAccount()
-    if BE_VERBOSE: print( "WALLET LOADED --> ", account.address)
-    trnxToken = callCloseAuction(contractInstance,auctionId=auctionID,fromAddress=account.address)
-    if BE_VERBOSE: print( "TX SENT (HASH) --> ", w3.toHex(trnxToken))
-    #receipt = w3.eth.wait_for_transaction_receipt(trnxToken)
-    return w3.toHex(trnxToken)
-
-def transferClo( addr , amount ):
-    if BE_VERBOSE: print( addr," --> ", amount)
-    account = setupAccount()
-    if BE_VERBOSE: print( "WALLET LOADED --> ", account.address)
-    trnxToken = sendCloToAddr(addr,fromAddress=account.address)
-    if BE_VERBOSE: print( "TX SENT (HASH) --> ", w3.toHex(trnxToken))
-    receipt = w3.eth.wait_for_transaction_receipt(trnxToken)
-    return (receipt,w3.toHex(trnxToken))
 
 def getABI(fromFile=None):
     if(fromFile is None):
@@ -137,69 +100,12 @@ def getABI(fromFile=None):
             info_json = json.load(f)
             return info_json
 
-def callTokenHolders(addr):
-    if BE_VERBOSE: print( addr," --> ", "tokenHolders")
-    contractInstance = loadContract(abi=CONTRACT_ABI,contractAddress=CONTRACT_ADDRESS)
-    if BE_VERBOSE: print( "CONTRACT LOADED --> ", contractInstance)
-    tokenHoldersResponse = contractInstance.functions.tokenHolders(addr).call()
-    return tokenHoldersResponse
-
-def callAuctions(auctionId):
-    if BE_VERBOSE: print( auctionId," --> ", "auctionId")
-    contractInstance = loadContract(abi=CONTRACT_ABI,contractAddress=CONTRACT_ADDRESS)
-    if BE_VERBOSE: print( "CONTRACT LOADED --> ", contractInstance)
-    auctionsResponse = contractInstance.functions.auctions(auctionId).call()
-    return auctionsResponse
-
-def sendCloToAddr(addr, fromAddress=None):
-    # simple example (Web3.py determines gas and fee)
-    #transaction = {
-    #    'to': addr,
-    #    'from': fromAddress,
-    #    'value': w3.toWei('1','gwei')
-    #}
-    #print(transaction)
-    #return w3.eth.send_transaction(transaction)
-    #get the nonce.  Prevents one from sending the transaction twice
-    nonce = w3.eth.getTransactionCount(fromAddress)
-
-    #build a transaction in a dictionary
-    tx = {
-        'nonce': nonce,
-        'to': addr,
-        'value': w3.toWei(1, 'ether'),
-        'gas': GASLIMIT_CLO_TRANSFER,
-        'gasPrice': int(w3.eth.gas_price*1.1)
-    }
-    #sign the transaction
-    signed_tx = w3.eth.account.sign_transaction(tx, PK)
-
-    #send transaction
-    tx_hash = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
-    return tx_hash
-
 def setupAccount():
     #acct = Account.privateKeyToAccount(PK)
     acct = w3.eth.account.from_key(PK)
     #acct = w3.eth.account.privateKeyToAccount(PK)
     #w3.eth.default_account = acct
     return acct
-
-def sendTokenToAddr(instance,addr, amount,fromAddress=None):
-    nonce = w3.eth.getTransactionCount(fromAddress)
-    tx = {
-        'nonce': nonce,
-        #'to': addr,
-        #'value': w3.toWei(1, 'ether'),
-        'gas': GASLIMIT_TOKEN_TRANSFER,
-        'gasPrice': int(w3.eth.gas_price*1.1)
-    }
-    transaction = instance.functions.transfer(addr,amount).buildTransaction(tx)
-    signed_txn = w3.eth.account.sign_transaction(transaction, PK)
-    txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-    return txn_hash
-
-
 
 w3 = connectToCallisto()
 
