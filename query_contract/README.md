@@ -49,14 +49,23 @@ _Contract verified at: https://ropsten.etherscan.io/address/0x40985d7c0357e31332
 At the time being, numbers are 0 because some issues with Ropsten faucets. In local scenarios, it appears like the following output:
 
 > py .\queryEthPool.py
+>
 > Connected? True
+>
 > Balance of Wallet Test: 0 ropstenETH
+>
 > Ahora vamos al contrato...
+>
 > Pool Balance: 400
+>
 > Rewards Balance: 200
+>
 > Last Reward Multiplied: 5000000000000000000
+>
 > Rewards count: 1
+>
 > Last Reward Time: 1649883959
+>
 > Status: 0
 
 ### Interact with the contract
