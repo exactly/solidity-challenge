@@ -1,5 +1,5 @@
 # exactly-private
-Repo privado para intentar el challenge de Solidity
+Repo privado para resolver el challenge de Solidity
 
 # Smart Contract Challenge
 
