@@ -23,19 +23,29 @@ It will return data about the balance of the pool (total staked), of the rewards
 Example:
 
 > Exactly\exactly-private\query_contract> **py .\queryEthPool.py**
+>
 > Connected? **True**
+>
 > Balance of Wallet Test: 0.138237453946299695 ropstenETH
+>
 > Ahora vamos al contrato...
+>
 > **Pool Balance:** 0
+>
 > **Rewards Balance:** 0
+>
 > **Last Reward Multiplied:** 0
+>
 > **Rewards count:** 0
+>
 > **Last Reward Time:** 0
+>
 > **Status:** 0
 
 
 
 _Contract verified at: https://ropsten.etherscan.io/address/0x40985d7c0357e31332860ffdea279e23ec0d5fc3#code_
+
 At the time being, numbers are 0 because some issues with Ropsten faucets.
 
 ### Interact with the contract
