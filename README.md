@@ -1,3 +1,6 @@
+# exactly-private
+Repo privado para resolver el challenge de Solidity
+
 # Smart Contract Challenge
 
 ## A) Challenge
