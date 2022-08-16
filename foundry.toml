@@ -1,0 +1,24 @@
+[profile.default]
+solc = '0.8.4'
+src = 'src'
+out = 'out'
+libs = ['lib']
+fuzz_runs = 1000
+optimizer_runs = 10_000
+
+[profile.optimized]
+via_ir = true
+out = 'out-via-ir'
+fuzz_runs = 5000
+
+[profile.test]
+via_ir = true
+out = 'out-via-ir'
+fuzz_runs = 5000
+src = 'test'
+
+[rpc_endpoints]
+goerli = "https://eth-goerli.alchemyapi.io/v2/${GOERLI_API_KEY}"
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
+
