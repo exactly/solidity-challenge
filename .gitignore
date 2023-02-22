@@ -1,0 +1,13 @@
+.idea
+node_modules
+artifacts
+cache
+typechain
+build
+coverage/
+coverage.json
+typechain-types
+.env
+.openzeppelin
+.vscode/
+.deps/

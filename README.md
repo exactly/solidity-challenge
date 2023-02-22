@@ -53,6 +53,3 @@ Bonus:
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
 _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
-
-### 5) Contact
-If you want to apply to this position, please share your solution to our Solidity Challenge to the following email: jobs@exactly.finance

@@ -1,0 +1,14 @@
+{
+  "extends": "solhint:default",
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "compiler-version": [
+      "error",
+      "0.8.17"
+    ],
+    "avoid-suicide": "error"
+  }
+}
