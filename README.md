@@ -1,3 +1,46 @@
+
+### Comments
+
+Build in foundry.
+
+Some domain assumptions;
+- each week is a different pool with different rewards
+- week number is defined by current timestamp / (7*24*60*60)
+- if you deposit 10 ether in week 1, and withdraw 10 ether in week 2, your rewards will be 0% for week 1 and 2
+- if you deposit 10 ether in week 1, and withdraw 5 ether in week 2, and on week 3 you withdraw 5 ether your rewards will be 0% for week 1, (5 ether / total deposits week 2)% of rewards for week 2, and 0 for week 3
+- Use WETH but send ether on withdraw and claims, it would be easier just use WETH
+- didnt fully tested, it may be really buggy
+
+### Deployed and verify on Goerli
+[0x729da725cfdb6c0f240aa6c473066c76fcdec57f](https://goerli.etherscan.io/address/0x729da725cfdb6c0f240aa6c473066c76fcdec57f)
+
+### Test coverage
+
+100% test coverge, however it may need mor test cases
+
+```bash
+(base) ➜  exactly-solidity-challenge git:(main) ✗  forge coverage
+[⠊] Compiling...
+[⠒] Compiling 15 files with 0.8.4
+[⠆] Solc 0.8.4 finished in 1.07s
+Compiler run successful
+Analysing contracts...
+Running tests...
++---------------------+-----------------+-----------------+-----------------+-----------------+
+| File                | % Lines         | % Statements    | % Branches      | % Funcs         |
++=============================================================================================+
+| script/Deploy.s.sol | 0.00% (0/4)     | 0.00% (0/4)     | 100.00% (0/0)   | 0.00% (0/2)     |
+|---------------------+-----------------+-----------------+-----------------+-----------------|
+| src/ETHPool.sol     | 100.00% (87/87) | 100.00% (96/96) | 100.00% (36/36) | 100.00% (13/13) |
+|---------------------+-----------------+-----------------+-----------------+-----------------|
+| src/mock/WETH.sol   | 100.00% (3/3)   | 100.00% (3/3)   | 100.00% (0/0)   | 100.00% (2/2)   |
+|---------------------+-----------------+-----------------+-----------------+-----------------|
+| Total               | 95.74% (90/94)  | 96.12% (99/103) | 100.00% (36/36) | 88.24% (15/17)  |
++---------------------+-----------------+-----------------+-----------------+-----------------+
+```
+
+---
+
 # Smart Contract Challenge
 
 ## A) Challenge
